@@ -1,0 +1,9 @@
+tensorflow
+pillow
+scipy
+pandas
+scikit-image
+keras
+sklearn
+tf-utils
+openCV-python
