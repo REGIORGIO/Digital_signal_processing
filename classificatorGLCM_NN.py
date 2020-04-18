@@ -100,125 +100,74 @@ def get_nth_sum(df_data, i, n, key, SKO):
         return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key]) / n
     elif n == 4:
         return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key]) / n
+    elif n == 5:
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + + df_data[i+3][key]) / n
+
+
+def get_hapalick_params(df_data_new, df_data, i, n, SKO):
+    red_correlation = get_nth_sum(df_data, i, n, 'red_correlation', SKO)
+    red_contrast = get_nth_sum(df_data, i, n, 'red_contrast', SKO)
+    red_homogeneity = get_nth_sum(df_data, i, n, 'red_homogeneity', SKO)
+    red_energy = get_nth_sum(df_data, i, n, 'red_energy', SKO)
+
+    green_correlation = get_nth_sum(df_data, i, n, 'green_correlation', SKO)
+    green_contrast = get_nth_sum(df_data, i, n, 'green_contrast', SKO)
+    green_homogeneity = get_nth_sum(df_data, i, n, 'green_homogeneity', SKO)
+    green_energy = get_nth_sum(df_data, i, n, 'green_energy', SKO)
+
+    blue_correlation = get_nth_sum(df_data, i, n, 'blue_correlation', SKO)
+    blue_contrast = get_nth_sum(df_data, i, n, 'blue_contrast', SKO)
+    blue_homogeneity = get_nth_sum(df_data, i, n, 'blue_homogeneity', SKO)
+    blue_energy = get_nth_sum(df_data, i, n, 'blue_energy', SKO)
+	
+    cl = df_data[i]['class']
+
+    df_data_new.append({'red_correlation': red_correlation,
+                        'red_contrast': red_contrast,
+                        'red_homogeneity': red_homogeneity,
+                        'red_energy': red_energy,
+                        'green_correlation': green_correlation,
+                        'green_contrast': green_contrast,
+                        'green_homogeneity': green_homogeneity,
+                        'green_energy': green_energy,
+                        'blue_correlation': blue_correlation,
+                        'blue_contrast': blue_contrast,
+                        'blue_homogeneity': blue_homogeneity,
+                        'blue_energy': blue_energy,
+                        'class': cl
+                        })
+    return df_data_new
 
 
 def generate_haralick_params(df_data):
     df_data_new = []
     for i in range(5):
+        for i in range(1, len(df_data) - 3):
+            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class']:
+                SKO = random.randint(95, 105) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, SKO)  
+            else:
+                continue
+	
         for i in range(1, len(df_data) - 2):
             if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class']:
-
                 SKO = random.randint(95, 105) / 100
-
-                red_correlation = get_nth_sum(df_data, i, 4, 'red_correlation', SKO)
-                red_contrast = get_nth_sum(df_data, i, 4, 'red_contrast', SKO)
-                red_homogeneity = get_nth_sum(df_data, i, 4, 'red_homogeneity', SKO)
-                red_energy = get_nth_sum(df_data, i, 4, 'red_energy', SKO)
-
-                green_correlation = get_nth_sum(df_data, i, 4, 'green_correlation', SKO)
-                green_contrast = get_nth_sum(df_data, i, 4, 'green_contrast', SKO)
-                green_homogeneity = get_nth_sum(df_data, i, 4, 'green_homogeneity', SKO)
-                green_energy = get_nth_sum(df_data, i, 4, 'green_energy', SKO)
-
-                blue_correlation = get_nth_sum(df_data, i, 4, 'blue_correlation', SKO)
-                blue_contrast = get_nth_sum(df_data, i, 4, 'blue_contrast', SKO)
-                blue_homogeneity = get_nth_sum(df_data, i, 4, 'blue_homogeneity', SKO)
-                blue_energy = get_nth_sum(df_data, i, 4, 'blue_energy', SKO)
-
-                cl = df_data[i]['class']
-
-                df_data_new.append({'red_correlation': red_correlation,
-                                    'red_contrast': red_contrast,
-                                    'red_homogeneity': red_homogeneity,
-                                    'red_energy': red_energy,
-                                    'green_correlation': green_correlation,
-                                    'green_contrast': green_contrast,
-                                    'green_homogeneity': green_homogeneity,
-                                    'green_energy': green_energy,
-                                    'blue_correlation': blue_correlation,
-                                    'blue_contrast': blue_contrast,
-                                    'blue_homogeneity': blue_homogeneity,
-                                    'blue_energy': blue_energy,
-                                    'class': cl
-                                    })
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, SKO)  
             else:
                 continue
 
         for i in range(1, len(df_data) - 1):
             if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class']:
-
                 SKO = random.randint(95, 105) / 100
-
-                red_correlation = get_nth_sum(df_data, i, 3, 'red_correlation', SKO)
-                red_contrast = get_nth_sum(df_data, i, 3, 'red_contrast', SKO)
-                red_homogeneity = get_nth_sum(df_data, i, 3, 'red_homogeneity', SKO)
-                red_energy = get_nth_sum(df_data, i, 3, 'red_energy', SKO)
-
-                green_correlation = get_nth_sum(df_data, i, 3, 'green_correlation', SKO)
-                green_contrast = get_nth_sum(df_data, i, 3, 'green_contrast', SKO)
-                green_homogeneity = get_nth_sum(df_data, i, 3, 'green_homogeneity', SKO)
-                green_energy = get_nth_sum(df_data, i, 3, 'green_energy', SKO)
-
-                blue_correlation = get_nth_sum(df_data, i, 3, 'blue_correlation', SKO)
-                blue_contrast = get_nth_sum(df_data, i, 3, 'blue_contrast', SKO)
-                blue_homogeneity = get_nth_sum(df_data, i, 3, 'blue_homogeneity', SKO)
-                blue_energy = get_nth_sum(df_data, i, 3, 'blue_energy', SKO)
-
-                cl = df_data[i]['class']
-
-                df_data_new.append({'red_correlation': red_correlation,
-                                    'red_contrast': red_contrast,
-                                    'red_homogeneity': red_homogeneity,
-                                    'red_energy': red_energy,
-                                    'green_correlation': green_correlation,
-                                    'green_contrast': green_contrast,
-                                    'green_homogeneity': green_homogeneity,
-                                    'green_energy': green_energy,
-                                    'blue_correlation': blue_correlation,
-                                    'blue_contrast': blue_contrast,
-                                    'blue_homogeneity': blue_homogeneity,
-                                    'blue_energy': blue_energy,
-                                    'class': cl
-                                    })
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, SKO)
             else:
                 continue
 
         for i in range(1, len(df_data)):
             if df_data[i]['class'] == df_data[i - 1]['class']:
-
                 SKO = random.randint(95, 105) / 100
-
-                red_correlation = get_nth_sum(df_data, i, 2, 'red_correlation', SKO)
-                red_contrast = get_nth_sum(df_data, i, 2, 'red_contrast', SKO)
-                red_homogeneity = get_nth_sum(df_data, i, 2, 'red_homogeneity', SKO)
-                red_energy = get_nth_sum(df_data, i, 2, 'red_energy', SKO)
-
-                green_correlation = get_nth_sum(df_data, i, 2, 'green_correlation', SKO)
-                green_contrast = get_nth_sum(df_data, i, 2, 'green_contrast', SKO)
-                green_homogeneity = get_nth_sum(df_data, i, 2, 'green_homogeneity', SKO)
-                green_energy = get_nth_sum(df_data, i, 2, 'green_energy', SKO)
-
-                blue_correlation = get_nth_sum(df_data, i, 2, 'blue_correlation', SKO)
-                blue_contrast = get_nth_sum(df_data, i, 2, 'blue_contrast', SKO)
-                blue_homogeneity = get_nth_sum(df_data, i, 2, 'blue_homogeneity', SKO)
-                blue_energy = get_nth_sum(df_data, i, 2, 'blue_energy', SKO)
-
-                cl = df_data[i]['class']
-
-                df_data_new.append({'red_correlation': red_correlation,
-                                    'red_contrast': red_contrast,
-                                    'red_homogeneity': red_homogeneity,
-                                    'red_energy': red_energy,
-                                    'green_correlation': green_correlation,
-                                    'green_contrast': green_contrast,
-                                    'green_homogeneity': green_homogeneity,
-                                    'green_energy': green_energy,
-                                    'blue_correlation': blue_correlation,
-                                    'blue_contrast': blue_contrast,
-                                    'blue_homogeneity': blue_homogeneity,
-                                    'blue_energy': blue_energy,
-                                    'class': cl
-                                    })
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, SKO)
+                
             else:
                 continue
 
