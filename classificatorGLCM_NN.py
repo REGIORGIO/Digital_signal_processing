@@ -222,7 +222,7 @@ def generate_haralick_params(df_data):
             else:
                 continue
 
-    return df_data_new + df_data
+    return df_data_new
 
 
 def get_optimal_params(x_train, y_train, x_test, y_test):
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     # #                     max_iter=optimal_params['max_iter'],
     # #                     solver=optimal_params['solver'])
     clf = MLPClassifier(activation='logistic',
-                        max_iter=15000,
+                        max_iter=5000,
                         solver='lbfgs')
 
 
