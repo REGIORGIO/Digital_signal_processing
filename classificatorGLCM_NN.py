@@ -93,6 +93,15 @@ def generator_data(root):
     return df_data
 
 
+def GetNthSum(df_data, i, n, key, SKO):
+    if n == 2:
+        return SKO * (df_data[i-1][key] + df_data[i][key]) / n
+    elif n == 3:
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key])/ n
+    elif n == 4:
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+1][key])/ n
+
+
 def generate_haralick_params(df_data):
     df_data_new = []
     for i in range(1, len(df_data) - 1):
@@ -100,59 +109,20 @@ def generate_haralick_params(df_data):
 
             CKO = random.randint(95, 105) / 100
 
-            red_correlation = CKO * (df_data[i-1]['red_correlation'] + df_data[i]['red_correlation'] + df_data[i+1]['red_correlation'])/3
-            red_contrast = CKO * (df_data[i - 1]['red_contrast'] + df_data[i]['red_contrast'] + df_data[i + 1]['red_contrast']) / 3
-            red_homogeneity = CKO * (df_data[i - 1]['red_homogeneity'] + df_data[i]['red_homogeneity'] + df_data[i + 1]['red_homogeneity']) / 3
-            red_energy = CKO * (df_data[i - 1]['red_energy'] + df_data[i]['red_energy'] + df_data[i + 1]['red_energy']) / 3
+            red_correlation = GetNthSum(df_data, i, 3, 'red_correlation', CKO)
+            red_contrast = GetNthSum(df_data, i, 3, 'red_contrast', CKO)
+            red_homogeneity = GetNthSum(df_data, i, 3, 'red_homogeneity', CKO)
+            red_energy = GetNthSum(df_data, i, 3, 'red_energy', CKO)
 
-            green_correlation = CKO * (df_data[i - 1]['green_correlation'] + df_data[i]['green_correlation'] + df_data[i + 1]['green_correlation']) / 3
-            green_contrast = CKO * (df_data[i - 1]['green_contrast'] + df_data[i]['green_contrast'] + df_data[i + 1]['green_contrast']) / 3
-            green_homogeneity = CKO * (df_data[i - 1]['green_homogeneity'] + df_data[i]['green_homogeneity'] + df_data[i + 1]['green_homogeneity']) / 3
-            green_energy = CKO * (df_data[i - 1]['green_energy'] + df_data[i]['green_energy'] + df_data[i + 1]['green_energy']) / 3
+            green_correlation = GetNthSum(df_data, i, 3, 'green_correlation', CKO)
+            green_contrast = GetNthSum(df_data, i, 3, 'green_contrast', CKO)
+            green_homogeneity = GetNthSum(df_data, i, 3, 'green_homogeneity', CKO)
+            green_energy = GetNthSum(df_data, i, 3, 'green_energy', CKO)
 
-            blue_correlation = CKO * (df_data[i - 1]['blue_correlation'] + df_data[i]['blue_correlation'] + df_data[i + 1]['blue_correlation']) / 3
-            blue_contrast = CKO * (df_data[i - 1]['blue_contrast'] + df_data[i]['blue_contrast'] + df_data[i + 1]['blue_contrast']) / 3
-            blue_homogeneity = CKO * (df_data[i - 1]['blue_homogeneity'] + df_data[i]['blue_homogeneity'] + df_data[i + 1]['blue_homogeneity']) / 3
-            blue_energy = CKO * (df_data[i - 1]['blue_energy'] + df_data[i]['blue_energy'] + df_data[i + 1]['blue_energy']) / 3
-
-            cl = df_data[i]['class']
-
-            df_data_new.append({'red_correlation': red_correlation,
-                                'red_contrast': red_contrast,
-                                'red_homogeneity': red_homogeneity,
-                                'red_energy': red_energy,
-                                'green_correlation': green_correlation,
-                                'green_contrast': green_contrast,
-                                'green_homogeneity': green_homogeneity,
-                                'green_energy': green_energy,
-                                'blue_correlation': blue_correlation,
-                                'blue_contrast': blue_contrast,
-                                'blue_homogeneity': blue_homogeneity,
-                                'blue_energy': blue_energy,
-                                'class': cl
-                                })
-        else:
-            continue
-
-    for i in range(1, len(df_data)):
-        if df_data[i]['class'] == df_data[i-1]['class']:
-
-            CKO = random.randint(95, 105) / 100
-
-            red_correlation = CKO * (df_data[i-1]['red_correlation'] + df_data[i]['red_correlation']) / 2
-            red_contrast = CKO * (df_data[i - 1]['red_contrast'] + df_data[i]['red_contrast']) / 2
-            red_homogeneity = CKO * (df_data[i - 1]['red_homogeneity'] + df_data[i]['red_homogeneity']) / 2
-            red_energy = CKO * (df_data[i - 1]['red_energy'] + df_data[i]['red_energy']) / 2
-
-            green_correlation = CKO * (df_data[i - 1]['green_correlation'] + df_data[i]['green_correlation']) / 2
-            green_contrast = CKO * (df_data[i - 1]['green_contrast'] + df_data[i]['green_contrast']) / 2
-            green_homogeneity = CKO * (df_data[i - 1]['green_homogeneity'] + df_data[i]['green_homogeneity']) / 2
-            green_energy = CKO * (df_data[i - 1]['green_energy'] + df_data[i]['green_energy']) / 2
-
-            blue_correlation = CKO * (df_data[i - 1]['blue_correlation'] + df_data[i]['blue_correlation']) / 2
-            blue_contrast = CKO * (df_data[i - 1]['blue_contrast'] + df_data[i]['blue_contrast']) / 2
-            blue_homogeneity = CKO * (df_data[i - 1]['blue_homogeneity'] + df_data[i]['blue_homogeneity']) / 2
-            blue_energy = CKO * (df_data[i - 1]['blue_energy'] + df_data[i]['blue_energy']) / 2
+            blue_correlation = GetNthSum(df_data, i, 3, 'blue_correlation', CKO)
+            blue_contrast = GetNthSum(df_data, i, 3, 'blue_contrast', CKO)
+            blue_homogeneity = GetNthSum(df_data, i, 3, 'blue_homogeneity', CKO)
+            blue_energy = GetNthSum(df_data, i, 3, 'blue_energy', CKO)
 
             cl = df_data[i]['class']
 
