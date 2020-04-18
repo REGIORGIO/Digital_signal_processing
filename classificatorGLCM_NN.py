@@ -1,34 +1,22 @@
-from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import Conv2D, MaxPooling2D
-from tensorflow.python.keras.layers import Activation, Dropout, Flatten, Dense
 import pandas as pd
-import tensorflow.keras.metrics as metrics
-#import tensorflow_utils as tf_utils
-from sklearn.model_selection import train_test_split
 from skimage.feature import greycomatrix, greycoprops
 import skimage
 import skimage.io
 import os
-import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
-from sklearn.preprocessing import LabelEncoder
-import keras
-import keras.utils
-from keras import utils as np_utils
 import sklearn.metrics as metrics
 import random
+
 
 def generator_data(root):
     image_index = 0
     illness_index = 1
 
     df_data = []  # saving parameters Haralick's
-    
+
     for i, folder_dir in enumerate(os.listdir(root)):
         if folder_dir[0] == ".":
             continue
@@ -146,7 +134,46 @@ def generate_haralick_params(df_data):
         else:
             continue
 
-    return df_data_new + df_data
+    for i in range(1, len(df_data)):
+        if df_data[i]['class'] == df_data[i-1]['class']:
+
+            CKO = random.randint(95, 105) / 100
+
+            red_correlation = CKO * (df_data[i-1]['red_correlation'] + df_data[i]['red_correlation']) / 2
+            red_contrast = CKO * (df_data[i - 1]['red_contrast'] + df_data[i]['red_contrast']) / 2
+            red_homogeneity = CKO * (df_data[i - 1]['red_homogeneity'] + df_data[i]['red_homogeneity']) / 2
+            red_energy = CKO * (df_data[i - 1]['red_energy'] + df_data[i]['red_energy']) / 2
+
+            green_correlation = CKO * (df_data[i - 1]['green_correlation'] + df_data[i]['green_correlation']) / 2
+            green_contrast = CKO * (df_data[i - 1]['green_contrast'] + df_data[i]['green_contrast']) / 2
+            green_homogeneity = CKO * (df_data[i - 1]['green_homogeneity'] + df_data[i]['green_homogeneity']) / 2
+            green_energy = CKO * (df_data[i - 1]['green_energy'] + df_data[i]['green_energy']) / 2
+
+            blue_correlation = CKO * (df_data[i - 1]['blue_correlation'] + df_data[i]['blue_correlation']) / 2
+            blue_contrast = CKO * (df_data[i - 1]['blue_contrast'] + df_data[i]['blue_contrast']) / 2
+            blue_homogeneity = CKO * (df_data[i - 1]['blue_homogeneity'] + df_data[i]['blue_homogeneity']) / 2
+            blue_energy = CKO * (df_data[i - 1]['blue_energy'] + df_data[i]['blue_energy']) / 2
+
+            cl = df_data[i]['class']
+
+            df_data_new.append({'red_correlation': red_correlation,
+                                'red_contrast': red_contrast,
+                                'red_homogeneity': red_homogeneity,
+                                'red_energy': red_energy,
+                                'green_correlation': green_correlation,
+                                'green_contrast': green_contrast,
+                                'green_homogeneity': green_homogeneity,
+                                'green_energy': green_energy,
+                                'blue_correlation': blue_correlation,
+                                'blue_contrast': blue_contrast,
+                                'blue_homogeneity': blue_homogeneity,
+                                'blue_energy': blue_energy,
+                                'class': cl
+                                })
+        else:
+            continue
+
+    return df_data_new
 
 
 if __name__ == "__main__":
@@ -177,6 +204,12 @@ if __name__ == "__main__":
     df_train = (generator_data('./train_dir/'))
 
     #
+    # увеличиваем тестовый датасет
+    df_test = pd.concat([df_test, df_val])
+
+    x_test = df_test.iloc[:, 0:12]
+    y_test = df_test.iloc[:, 12]
+    # # #
 
     #
     #
@@ -191,20 +224,15 @@ if __name__ == "__main__":
     y_train = df_train.iloc[:, 12]
     #
 
-    # увеличиваем тестовый датасет
-    df_test = pd.concat([df_test, df_val])
 
-    x_test = df_test.iloc[:, 0:12]
-    y_test = df_test.iloc[:, 12]
-    # # #
 
 
     parameter_space = {
         'alpha': [0.0001, 0.001, 0.01],
-        'hidden_layer_sizes': [(30, 30), (40, 40), (50, 50), (100, 100)],
+        'hidden_layer_sizes': [(30, 30), (40, 40), (50, 50), (100, 100), (100,)],
         'activation': ['relu', 'logistic'],
         'solver': ['lbfgs'],
-        'max_iter': [100, 200, 300, 400, 500, 600, 700]
+        'max_iter': [600, 700, 800, 900, 1000]
     }
     mlp = MLPClassifier(verbose=0)
 
