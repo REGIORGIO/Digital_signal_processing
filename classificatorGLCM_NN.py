@@ -9,7 +9,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import sklearn.metrics as metrics
 import random
-
+from statistics import mean
 
 def generator_data(root):
     image_index = 0
@@ -101,7 +101,13 @@ def get_nth_sum(df_data, i, n, key, SKO):
     elif n == 4:
         return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key]) / n
     elif n == 5:
-        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + + df_data[i+3][key]) / n
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key]) / n
+    elif n == 6:
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] + df_data[i+4][key]) / n
+    elif n == 7:
+        return SKO * (
+                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][
+                key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
 
 
 def get_hapalick_params(df_data_new, df_data, i, n, SKO):
@@ -119,9 +125,7 @@ def get_hapalick_params(df_data_new, df_data, i, n, SKO):
     blue_contrast = get_nth_sum(df_data, i, n, 'blue_contrast', SKO)
     blue_homogeneity = get_nth_sum(df_data, i, n, 'blue_homogeneity', SKO)
     blue_energy = get_nth_sum(df_data, i, n, 'blue_energy', SKO)
-	
     cl = df_data[i]['class']
-
     df_data_new.append({'red_correlation': red_correlation,
                         'red_contrast': red_contrast,
                         'red_homogeneity': red_homogeneity,
@@ -141,37 +145,51 @@ def get_hapalick_params(df_data_new, df_data, i, n, SKO):
 
 def generate_haralick_params(df_data):
     df_data_new = []
-    for i in range(5):
-        for i in range(1, len(df_data) - 3):
-            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class']:
-                SKO = random.randint(95, 105) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, SKO)  
+    d = 1
+    low = 100 - d
+    up = 100 + d
+    for i in range(1):
+        # for i in range(1, len(df_data) - 5):
+        #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class'] == df_data[i+5]['class']:
+        #         SKO = random.randint(low, up) / 100
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 7, SKO)
+        #     else:
+        #         continue
+        for i in range(1, len(df_data) - 4):
+            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class']:
+                SKO = random.randint(low, up) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 6, SKO)
             else:
                 continue
-	
+        for i in range(1, len(df_data) - 3):
+            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class']:
+                SKO = random.randint(low, up) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, SKO)
+            else:
+                continue
+
         for i in range(1, len(df_data) - 2):
             if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class']:
-                SKO = random.randint(95, 105) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, SKO)  
+                SKO = random.randint(low, up) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, SKO)
             else:
                 continue
 
         for i in range(1, len(df_data) - 1):
             if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class']:
-                SKO = random.randint(95, 105) / 100
+                SKO = random.randint(low, up) / 100
                 df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, SKO)
             else:
                 continue
 
-        for i in range(1, len(df_data)):
-            if df_data[i]['class'] == df_data[i - 1]['class']:
-                SKO = random.randint(95, 105) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, SKO)
-                
-            else:
-                continue
+        # for i in range(1, len(df_data)):
+        #     if df_data[i]['class'] == df_data[i - 1]['class']:
+        #         SKO = random.randint(low, up) / 100
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, SKO)
+        #     else:
+        #         continue
 
-    return df_data_new
+    return df_data + df_data_new
 
 
 def get_optimal_params(x_train, y_train, x_test, y_test):
@@ -223,7 +241,7 @@ def get_optimal(x_train, y_train, x_test, y_test):
 
     for alpha in parameter_space['alphas']:
         for hidden_layer_size in parameter_space['hidden_layer_sizes']:
-            for activation in  parameter_space['activations']:
+            for activation in parameter_space['activations']:
                 for solver in parameter_space['solvers']:
                     for max_iter in parameter_space['max_iters']:
                         clf = MLPClassifier(alpha=alpha,
@@ -311,18 +329,27 @@ if __name__ == "__main__":
     # #                     hidden_layer_sizes=optimal_params['hidden_layer_sizes'],
     # #                     max_iter=optimal_params['max_iter'],
     # #                     solver=optimal_params['solver'])
-    clf = MLPClassifier(activation='logistic',
-                        max_iter=5000,
-                        solver='lbfgs')
+
+    accs = []
+    # for _ in range(5):
+    #     clf = 0
+    clf = MLPClassifier(activation='relu',
+                        max_iter=1200,
+                        hidden_layer_sizes=(100, ),
+                        solver='lbfgs',
+                        random_state=1,
+                        early_stopping=True,
+                        max_fun=20000)
 
 
     clf.fit(x_train, y_train)
+    accs.append(clf.score(x_test, y_test))
 
-    accuracy = clf.score(x_test, y_test)
-    print("Accuracy = {}\n".format(accuracy))
-    target_names = ['1', '2', '3', '4', '5', '6', '7', '8']
-    y_pred = clf.predict(x_test)
-    print(classification_report(y_test, y_pred, target_names=target_names))
-    disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-    disp.figure_.suptitle("Confusion Matrix")
-    print("Confusion matrix:\n%s" % disp.confusion_matrix)
+    print(accs)
+    print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
+    # target_names = ['1', '2', '3', '4', '5', '6', '7', '8']
+    # y_pred = clf.predict(x_test)
+    # print(classification_report(y_test, y_pred, target_names=target_names))
+    # disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
+    # disp.figure_.suptitle("Confusion Matrix")
+    # print("Confusion matrix:\n%s" % disp.confusion_matrix)
