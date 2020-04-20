@@ -93,7 +93,18 @@ def generator_data(root):
     return df_data
 
 
-def get_nth_sum(df_data, i, n, key, SKO):
+def get_nth_sum(df_data, i, n, key, d):
+    # df_data_new = []
+    if d != 0:
+        low = 1 - d
+        up = 1 + d
+        SKO = random.choice(np.arange(low, up, 0.001))
+    else:
+        SKO = 1
+    # SKO = random.randint(low, up) / 1000
+    # print(SKO)
+    if n == 1:
+        return SKO * df_data[i][key]
     if n == 2:
         return SKO * (df_data[i-1][key] + df_data[i][key]) / n
     elif n == 3:
@@ -106,11 +117,12 @@ def get_nth_sum(df_data, i, n, key, SKO):
         return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] + df_data[i+4][key]) / n
     elif n == 7:
         return SKO * (
-                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][
-                key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
+                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
 
 
 def get_hapalick_params(df_data_new, df_data, i, n, SKO):
+
     red_correlation = get_nth_sum(df_data, i, n, 'red_correlation', SKO)
     red_contrast = get_nth_sum(df_data, i, n, 'red_contrast', SKO)
     red_homogeneity = get_nth_sum(df_data, i, n, 'red_homogeneity', SKO)
@@ -143,53 +155,55 @@ def get_hapalick_params(df_data_new, df_data, i, n, SKO):
     return df_data_new
 
 
-def generate_haralick_params(df_data):
+def generate_haralick_params(df_data, d, count):
     df_data_new = []
-    d = 1
-    low = 100 - d
-    up = 100 + d
-    for i in range(1):
+    # # d = 80
+    # low = 1000 - d
+    # up = 1000 + d
+    for i in range(count):
         # for i in range(1, len(df_data) - 5):
         #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class'] == df_data[i+5]['class']:
-        #         SKO = random.randint(low, up) / 100
-        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 7, SKO)
+        #         # SKO = random.randint(low, up) / 100
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 7, d)
         #     else:
         #         continue
-        for i in range(1, len(df_data) - 4):
-            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class']:
-                SKO = random.randint(low, up) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 6, SKO)
-            else:
-                continue
-        for i in range(1, len(df_data) - 3):
-            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class']:
-                SKO = random.randint(low, up) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, SKO)
-            else:
-                continue
-
-        for i in range(1, len(df_data) - 2):
-            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class']:
-                SKO = random.randint(low, up) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, SKO)
-            else:
-                continue
-
-        for i in range(1, len(df_data) - 1):
-            if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class']:
-                SKO = random.randint(low, up) / 100
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, SKO)
-            else:
-                continue
+        # for i in range(1, len(df_data) - 4):
+        #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class']:
+        #         # SKO = random.randint(low, up) / 1000
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 6, d)
+        #     else:
+        #         continue
+        # for i in range(1, len(df_data) - 3):
+        #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class']:
+        #         # SKO = random.randint(low, up) / 1000
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, d)
+        #     else:
+        #         continue
+        #
+        # for i in range(1, len(df_data) - 2):
+        #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class']:
+        #         # SKO = random.randint(low, up) / 1000
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, d)
+        #     else:
+        #         continue
+        #
+        # for i in range(1, len(df_data)-1):
+        #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class']:
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, d)
+        #     else:
+        #         continue
 
         # for i in range(1, len(df_data)):
         #     if df_data[i]['class'] == df_data[i - 1]['class']:
-        #         SKO = random.randint(low, up) / 100
-        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, SKO)
+        #         # SKO = random.randint(low, up) / 100
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, d)
         #     else:
         #         continue
 
-    return df_data + df_data_new
+        for i in range(0, len(df_data)):
+            df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, d)
+
+    return  df_data_new
 
 
 def get_optimal_params(x_train, y_train, x_test, y_test):
@@ -295,16 +309,16 @@ if __name__ == "__main__":
                     }
     '''
 
-    df_test = pd.DataFrame(generator_data('./test_dir/'))
+    df_test = (generator_data('./train_dir/'))
     df_val = pd.DataFrame(generator_data('./val_dir/'))
     df_train = (generator_data('./train_dir/'))
 
     #
     # увеличиваем тестовый датасет
-    df_test = pd.concat([df_test, df_val])
+    # df_test = pd.concat([df_test, df_val])
 
-    x_test = df_test.iloc[:, 0:12]
-    y_test = df_test.iloc[:, 12]
+    # x_test = df_test.iloc[:, 0:12]
+    # y_test = df_test.iloc[:, 12]
     # # #
 
     #
@@ -314,7 +328,12 @@ if __name__ == "__main__":
     # y_train = df_train.iloc[:, 12]
     #
 
-    df_train = pd.DataFrame(generate_haralick_params(df_train))
+    df_train = pd.DataFrame(generate_haralick_params(df_train, 0.06, 10))
+    df_test = pd.DataFrame(generate_haralick_params(df_test, 0.02, 1))
+
+    x_test = df_test.iloc[:, 0:12]
+    y_test = df_test.iloc[:, 12]
+    # #
 
     x_train = df_train.iloc[:, 0:12]
     y_train = df_train.iloc[:, 12]
@@ -339,9 +358,10 @@ if __name__ == "__main__":
                         solver='lbfgs',
                         random_state=1,
                         early_stopping=True,
-                        max_fun=20000)
+                        max_fun=20000,
+                        verbose=0)
 
-
+    # for _ in range(5):
     clf.fit(x_train, y_train)
     accs.append(clf.score(x_test, y_test))
 
