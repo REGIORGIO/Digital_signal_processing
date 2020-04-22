@@ -119,6 +119,18 @@ def get_nth_sum(df_data, i, n, key, d):
         return SKO * (
                     df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
         [key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
+    elif n == 8:
+	    return SKO * (
+                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key] + + df_data[i + 6][key]) / n
+    elif n == 9:
+        return SKO * (
+                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / n
+    elif n == 10:
+        return SKO * (
+                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] + df_data[i + 8][key]) / n
 
 
 def get_hapalick_params(df_data_new, df_data, i, n, SKO):
