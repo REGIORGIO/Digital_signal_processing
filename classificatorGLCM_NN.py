@@ -10,6 +10,7 @@ from sklearn.metrics import classification_report
 import sklearn.metrics as metrics
 import random
 from statistics import mean
+from matplotlib import pyplot as plt
 
 def generator_data(root):
     image_index = 0
@@ -21,13 +22,13 @@ def generator_data(root):
         if folder_dir[0] == ".":
             continue
 
-        print("Folder: ", folder_dir)
+        # print("Folder: ", folder_dir)
         for _, filename in enumerate(os.listdir(root + folder_dir)):
             path = root + folder_dir + "/" + filename
             if filename[0] == ".":
                 continue
             img_new = skimage.io.imread(path) #Загружаем очередное изображение по указанному пути
-            print(" -Filename: {}, Original Image Shape:{} ".format(filename, img_new.shape)) #выводим разрешение изображения и цвета(?)
+            # print(" -Filename: {}, Original Image Shape:{} ".format(filename, img_new.shape)) #выводим разрешение изображения и цвета(?)
             # print(img_new)
 
             # red
@@ -94,15 +95,13 @@ def generator_data(root):
 
 
 def get_nth_sum(df_data, i, n, key, d):
-    # df_data_new = []
+
     if d != 0:
         low = 1 - d
         up = 1 + d
-        SKO = random.choice(np.arange(low, up, 0.001))
+        SKO = random.choice(np.arange(low, up, 0.0001))
     else:
         SKO = 1
-    # SKO = random.randint(low, up) / 1000
-    # print(SKO)
     if n == 1:
         return SKO * df_data[i][key]
     if n == 2:
@@ -117,8 +116,21 @@ def get_nth_sum(df_data, i, n, key, d):
         return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] + df_data[i+4][key]) / n
     elif n == 7:
         return SKO * (
-                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
+                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key]
+                    + df_data[i + 3][key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
+    elif n == 8:
+        return SKO * (
+                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key] + + df_data[i + 6][key]) / n
+    elif n == 9:
+        return SKO * (
+                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / n
+    elif n == 10:
+        return SKO * (
+                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
+        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] + df_data[i + 8][
+                    key]) / n
 
 
 def get_hapalick_params(df_data_new, df_data, i, n, SKO):
@@ -161,6 +173,31 @@ def generate_haralick_params(df_data, d, count):
     # low = 1000 - d
     # up = 1000 + d
     for i in range(count):
+        for i in range(1, len(df_data) - 8):
+            if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
+                    df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] ==\
+                    df_data[i + 7]['class'] == df_data[i + 8]['class']:
+                # SKO = random.randint(low, up) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 10, d)
+            else:
+                continue
+        #
+        for i in range(1, len(df_data) - 7):
+            if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
+                    df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] == df_data[i + 7]['class']:
+                # SKO = random.randint(low, up) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 9, d)
+            else:
+                continue
+        #
+        # for i in range(1, len(df_data) - 6):
+        #     if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
+        #             df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class']:
+        #         # SKO = random.randint(low, up) / 100
+        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 8, d)
+        #     else:
+        #         continue
+        # #
         # for i in range(1, len(df_data) - 5):
         #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class'] == df_data[i+5]['class']:
         #         # SKO = random.randint(low, up) / 100
@@ -182,28 +219,26 @@ def generate_haralick_params(df_data, d, count):
         #
         # for i in range(1, len(df_data) - 2):
         #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class']:
-        #         # SKO = random.randint(low, up) / 1000
         #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, d)
         #     else:
         #         continue
-        #
         # for i in range(1, len(df_data)-1):
         #     if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class']:
         #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, d)
         #     else:
         #         continue
-
-        # for i in range(1, len(df_data)):
-        #     if df_data[i]['class'] == df_data[i - 1]['class']:
-        #         # SKO = random.randint(low, up) / 100
-        #         df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, d)
-        #     else:
-        #         continue
+        #
+        for i in range(1, len(df_data)):
+            if df_data[i]['class'] == df_data[i - 1]['class']:
+                # SKO = random.randint(low, up) / 100
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, d)
+            else:
+                continue
 
         for i in range(0, len(df_data)):
             df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, d)
 
-    return  df_data_new
+    return df_data_new + df_data
 
 
 def get_optimal_params(x_train, y_train, x_test, y_test):
@@ -309,9 +344,7 @@ if __name__ == "__main__":
                     }
     '''
 
-    df_test = (generator_data('./train_dir/'))
-    df_val = pd.DataFrame(generator_data('./val_dir/'))
-    df_train = (generator_data('./train_dir/'))
+
 
     #
     # увеличиваем тестовый датасет
@@ -328,48 +361,60 @@ if __name__ == "__main__":
     # y_train = df_train.iloc[:, 12]
     #
 
-    df_train = pd.DataFrame(generate_haralick_params(df_train, 0.06, 10))
-    df_test = pd.DataFrame(generate_haralick_params(df_test, 0.02, 1))
 
-    x_test = df_test.iloc[:, 0:12]
-    y_test = df_test.iloc[:, 12]
-    # #
-
-    x_train = df_train.iloc[:, 0:12]
-    y_train = df_train.iloc[:, 12]
     #
     # get_optimal(x_train, y_train, x_test, y_test)
     # get_optimal_params(x_train, y_train, x_test, y_test)
 
     # print('Оптимальные параметры найдены: {}'.format(optimal_params))
-    print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
-    # # clf = MLPClassifier(activation=optimal_params['activation'],
-    # #                     alpha=optimal_params['alpha'],
-    # #                     hidden_layer_sizes=optimal_params['hidden_layer_sizes'],
-    # #                     max_iter=optimal_params['max_iter'],
-    # #                     solver=optimal_params['solver'])
+
 
     accs = []
-    # for _ in range(5):
-    #     clf = 0
-    clf = MLPClassifier(activation='relu',
-                        max_iter=1200,
-                        hidden_layer_sizes=(100, ),
-                        solver='lbfgs',
-                        random_state=1,
-                        early_stopping=True,
-                        max_fun=20000,
-                        verbose=0)
+    for i in range(50):
+        df_train = (generator_data('./train_dir/'))
+        df_test = (generator_data('./train_dir/'))
+        # df_val = pd.DataFrame(generator_data('./val_dir/'))
 
-    # for _ in range(5):
-    clf.fit(x_train, y_train)
-    accs.append(clf.score(x_test, y_test))
+        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.06, 50))
+        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.0, 10))
+
+
+        # df_test = pd.concat([df_test, df_val])
+        x_test = df_test.iloc[:, 0:12]
+        y_test = df_test.iloc[:, 12]
+
+        # for i in range(12):
+        #     numbers = df_test.iloc[0:10, i]
+        #     plt.hist(numbers, bins=10, cumulative=False)
+        #     plt.grid(linewidth=0.2)
+        #     plt.title(i)
+        #     plt.show()
+        # #
+
+        x_train = df_train.iloc[:, 0:12]
+        y_train = df_train.iloc[:, 12]
+        print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
+
+        clf = MLPClassifier(activation='logistic',
+                            max_iter=1200,
+                            hidden_layer_sizes=(100, ),
+                            solver='lbfgs',
+                            early_stopping=True,
+                            max_fun=20000,
+                            verbose=0)
+
+        clf.fit(x_train, y_train)
+        acc = clf.score(x_test, y_test)
+        accs.append(acc)
+        print(acc)
+
+        target_names = ['1', '2', '3', '6', '8']
+        y_pred = clf.predict(x_test)
+        print(classification_report(y_test, y_pred, target_names=target_names))
+        disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
+        disp.figure_.suptitle("Confusion Matrix")
+        print("Confusion matrix:\n%s" % disp.confusion_matrix)
+
 
     print(accs)
     print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
-    # target_names = ['1', '2', '3', '4', '5', '6', '7', '8']
-    # y_pred = clf.predict(x_test)
-    # print(classification_report(y_test, y_pred, target_names=target_names))
-    # disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-    # disp.figure_.suptitle("Confusion Matrix")
-    # print("Confusion matrix:\n%s" % disp.confusion_matrix)
