@@ -17,12 +17,13 @@ from sklearn.model_selection import train_test_split
 def generator_data(root):
     image_index = 0
     illness_index = 1
-    masks = [[132, 0, 0],
-             [204, 208, 193],
-             [245, 228, 103],
-             [54, 46, 34],
-             [182, 146, 82],
-             [0, 255, 0]]
+#[132, 0, 0], # red
+    masks = [[132, 0, 0], # red
+             [204, 208, 193], # grey
+             [245, 228, 103], # light yellow
+             [54, 46, 34], # brown
+             [182, 146, 82], # light brown
+             [0, 255, 0]] # light green
     r_coef, g_coef, b_coef = (0.3, 0.59, 0.11)
 
     offset = [20]
@@ -60,75 +61,84 @@ def generator_data(root):
             homogeneity1 = greycoprops(glcms[0], 'homogeneity')[0, 0]
             energy1 = greycoprops(glcms[0], 'energy')[0, 0]
             asm1 = greycoprops(glcms[0], 'ASM')[0, 0]
+            dissimilarity1 = greycoprops(glcms[0], 'dissimilarity')[0, 0]
 
             correlation2 = greycoprops(glcms[1], 'correlation')[0, 0]
             contrast2 = greycoprops(glcms[1], 'contrast')[0, 0]
             homogeneity2 = greycoprops(glcms[1], 'homogeneity')[0, 0]
             energy2 = greycoprops(glcms[1], 'energy')[0, 0]
             asm2 = greycoprops(glcms[1], 'ASM')[0, 0]
+            dissimilarity2 = greycoprops(glcms[1], 'dissimilarity')[0, 0]
 
             correlation3 = greycoprops(glcms[2], 'correlation')[0, 0]
             contrast3 = greycoprops(glcms[2], 'contrast')[0, 0]
             homogeneity3 = greycoprops(glcms[2], 'homogeneity')[0, 0]
             energy3 = greycoprops(glcms[2], 'energy')[0, 0]
             asm3 = greycoprops(glcms[2], 'ASM')[0, 0]
+            dissimilarity3 = greycoprops(glcms[2], 'dissimilarity')[0, 0]
 
             correlation4 = greycoprops(glcms[3], 'correlation')[0, 0]
             contrast4 = greycoprops(glcms[3], 'contrast')[0, 0]
             homogeneity4 = greycoprops(glcms[3], 'homogeneity')[0, 0]
             energy4 = greycoprops(glcms[3], 'energy')[0, 0]
             asm4 = greycoprops(glcms[3], 'ASM')[0, 0]
+            dissimilarity4 = greycoprops(glcms[3], 'dissimilarity')[0, 0]
 
             correlation5 = greycoprops(glcms[4], 'correlation')[0, 0]
             contrast5 = greycoprops(glcms[4], 'contrast')[0, 0]
             homogeneity5 = greycoprops(glcms[4], 'homogeneity')[0, 0]
             energy5 = greycoprops(glcms[4], 'energy')[0, 0]
             asm5 = greycoprops(glcms[4], 'ASM')[0, 0]
+            dissimilarity5 = greycoprops(glcms[4], 'dissimilarity')[0, 0]
 
             correlation6 = greycoprops(glcms[5], 'correlation')[0, 0]
             contrast6 = greycoprops(glcms[5], 'contrast')[0, 0]
             homogeneity6 = greycoprops(glcms[5], 'homogeneity')[0, 0]
             energy6 = greycoprops(glcms[5], 'energy')[0, 0]
             asm6 = greycoprops(glcms[5], 'ASM')[0, 0]
-
-
-
+            dissimilarity6 = greycoprops(glcms[5], 'dissimilarity')[0, 0]
 
             df_data.append({'correlation1': correlation1,
                             'contrast1': contrast1,
                             'homogeneity1': homogeneity1,
                             'energy1': energy1,
                             'asm1': asm1,
+                            'dissimilarity1': dissimilarity1,
 
                             'correlation2': correlation2,
                             'contrast2': contrast2,
                             'homogeneity2': homogeneity2,
                             'energy2': energy2,
                             'asm2': asm2,
+                            'dissimilarity2': dissimilarity2,
 
                             'correlation3': correlation3,
                             'contrast3': contrast3,
                             'homogeneity3': homogeneity3,
                             'energy3': energy3,
                             'asm3': asm3,
+                            'dissimilarity3': dissimilarity3,
 
                             'correlation4': correlation4,
                             'contrast4': contrast4,
                             'homogeneity4': homogeneity4,
                             'energy4': energy4,
                             'asm4': asm4,
+                            'dissimilarity4': dissimilarity4,
 
                             'correlation5': correlation5,
                             'contrast5': contrast5,
                             'homogeneity5': homogeneity5,
                             'energy5': energy5,
                             'asm5': asm5,
+                            'dissimilarity5': dissimilarity5,
 
                             'correlation6': correlation6,
                             'contrast6': contrast6,
                             'homogeneity6': homogeneity6,
                             'energy6': energy6,
                             'asm6': asm6,
+                            'dissimilarity6': dissimilarity6,
 
                             'class': int(folder_dir)})
 
@@ -183,36 +193,42 @@ def get_hapalick_params(df_data_new, df_data, i, n, SKO):
     homogeneity1 = get_nth_sum(df_data, i, n, 'homogeneity1', SKO)
     energy1 = get_nth_sum(df_data, i, n, 'energy1', SKO)
     asm1 = get_nth_sum(df_data, i, n, 'asm1', SKO)
+    dissimilarity1 = get_nth_sum(df_data, i, n, 'dissimilarity1', SKO)
 
     correlation2 = get_nth_sum(df_data, i, n, 'correlation2', SKO)
     contrast2 = get_nth_sum(df_data, i, n, 'contrast2', SKO)
     homogeneity2 = get_nth_sum(df_data, i, n, 'homogeneity2', SKO)
     energy2 = get_nth_sum(df_data, i, n, 'energy2', SKO)
     asm2 = get_nth_sum(df_data, i, n, 'asm2', SKO)
+    dissimilarity2 = get_nth_sum(df_data, i, n, 'dissimilarity2', SKO)
 
     correlation3 = get_nth_sum(df_data, i, n, 'correlation3', SKO)
     contrast3 = get_nth_sum(df_data, i, n, 'contrast3', SKO)
     homogeneity3 = get_nth_sum(df_data, i, n, 'homogeneity3', SKO)
     energy3 = get_nth_sum(df_data, i, n, 'energy3', SKO)
     asm3 = get_nth_sum(df_data, i, n, 'asm3', SKO)
+    dissimilarity3 = get_nth_sum(df_data, i, n, 'dissimilarity3', SKO)
 
     correlation4 = get_nth_sum(df_data, i, n, 'correlation4', SKO)
     contrast4 = get_nth_sum(df_data, i, n, 'contrast4', SKO)
     homogeneity4 = get_nth_sum(df_data, i, n, 'homogeneity4', SKO)
     energy4 = get_nth_sum(df_data, i, n, 'energy4', SKO)
     asm4 = get_nth_sum(df_data, i, n, 'asm4', SKO)
+    dissimilarity4 = get_nth_sum(df_data, i, n, 'dissimilarity4', SKO)
 
     correlation5 = get_nth_sum(df_data, i, n, 'correlation5', SKO)
     contrast5 = get_nth_sum(df_data, i, n, 'contrast5', SKO)
     homogeneity5 = get_nth_sum(df_data, i, n, 'homogeneity5', SKO)
     energy5 = get_nth_sum(df_data, i, n, 'energy5', SKO)
     asm5 = get_nth_sum(df_data, i, n, 'asm5', SKO)
+    dissimilarity5 = get_nth_sum(df_data, i, n, 'dissimilarity5', SKO)
 
     correlation6 = get_nth_sum(df_data, i, n, 'correlation6', SKO)
     contrast6 = get_nth_sum(df_data, i, n, 'contrast6', SKO)
     homogeneity6 = get_nth_sum(df_data, i, n, 'homogeneity6', SKO)
     energy6 = get_nth_sum(df_data, i, n, 'energy6', SKO)
     asm6 = get_nth_sum(df_data, i, n, 'asm6', SKO)
+    dissimilarity6 = get_nth_sum(df_data, i, n, 'dissimilarity6', SKO)
 
     cl = df_data[i]['class']
     df_data_new.append({'correlation1': correlation1,
@@ -220,36 +236,42 @@ def get_hapalick_params(df_data_new, df_data, i, n, SKO):
                         'homogeneity1': homogeneity1,
                         'energy1': energy1,
                         'asm1': asm1,
+                        'dissimilarity1': dissimilarity1,
 
                         'correlation2': correlation2,
                         'contrast2': contrast2,
                         'homogeneity2': homogeneity2,
                         'energy2': energy2,
                         'asm2': asm2,
+                        'dissimilarity2': dissimilarity2,
 
                         'correlation3': correlation3,
                         'contrast3': contrast3,
                         'homogeneity3': homogeneity3,
                         'energy3': energy3,
                         'asm3': asm3,
+                        'dissimilarity3': dissimilarity3,
 
                         'correlation4': correlation4,
                         'contrast4': contrast4,
                         'homogeneity4': homogeneity4,
                         'energy4': energy4,
                         'asm4': asm4,
+                        'dissimilarity4': dissimilarity4,
 
                         'correlation5': correlation5,
                         'contrast5': contrast5,
                         'homogeneity5': homogeneity5,
                         'energy5': energy5,
                         'asm5': asm5,
+                        'dissimilarity5': dissimilarity5,
 
                         'correlation6': correlation6,
                         'contrast6': contrast6,
                         'homogeneity6': homogeneity6,
                         'energy6': energy6,
                         'asm6': asm6,
+                        'dissimilarity6': dissimilarity6,
 
                         'class': cl
                         })
@@ -261,7 +283,7 @@ def generate_haralick_params(df_data, d, count, degrees):
     # # d = 80
     # low = 1000 - d
     # up = 1000 + d
-    for i in range(count):
+    for k in range(count):
         if 10 in degrees:
             for i in range(1, len(df_data) - 8):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
@@ -411,17 +433,17 @@ def get_optimal(x_train, y_train, x_test, y_test):
 
 def get_acc_for_wheat():
     accs = []
-    for i in range(10):
-        df_train = (generator_data('./new_dir/train_dir/'))
-        df_test = (generator_data('./new_dir/test_dir/'))
-        # df_val = pd.DataFrame(generator_data('./val_dir/'))
+    for i in range(100):
+        df_train = (generator_data('./train_dir/'))
+        df_test = (generator_data('./test_dir/'))
+        df_val = pd.DataFrame(generator_data('./val_dir/'))
 
-        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.1, 10, [4,3,2,1]))
-        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.0, 1, [1]))
+        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.3, 1000, [10]))
+        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.05, 100, [1]))
 
-        # df_test = pd.concat([df_test, df_val])
-        x_test = df_test.iloc[:, 0:30]
-        y_test = df_test.iloc[:, 30]
+        df_test = pd.concat([df_test, df_val])
+        x_test = df_test.iloc[:, 0:36]
+        y_test = df_test.iloc[:, 36]
 
         # for i in range(12):
         #     numbers = df_test.iloc[0:10, i]
@@ -431,11 +453,11 @@ def get_acc_for_wheat():
         #     plt.show()
         # #
 
-        x_train = df_train.iloc[:, 0:30]
-        y_train = df_train.iloc[:, 30]
+        x_train = df_train.iloc[:, 0:36]
+        y_train = df_train.iloc[:, 36]
         print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
 
-        clf = MLPClassifier(activation='relu',
+        clf = MLPClassifier(activation='logistic',
                             max_iter=1200,
                             hidden_layer_sizes=(100,100),
                             solver='lbfgs',
@@ -448,15 +470,18 @@ def get_acc_for_wheat():
         accs.append(acc)
         print(acc)
 
-        target_names = ['1', '2', '3', '4', '5', '6']
+        target_names = ['1', '2', '3', '6', '8']
         y_pred = clf.predict(x_test)
         print(classification_report(y_test, y_pred, target_names=target_names))
-        disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-        disp.figure_.suptitle("Confusion Matrix")
-        print("Confusion matrix:\n%s" % disp.confusion_matrix)
+        #disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
+        #disp.figure_.suptitle("Confusion Matrix")
+        #print("Confusion matrix:\n%s" % disp.confusion_matrix)
 
     print(accs)
     print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
+    plt.hist(accs, bins=10, cumulative=False)
+    plt.grid(linewidth=0.2)
+    plt.show()
 
 
 def get_acc_for_eucalyptus():
@@ -540,5 +565,5 @@ if __name__ == "__main__":
 
 
 
-    # get_acc_for_wheat()
-    get_acc_for_eucalyptus()
+    get_acc_for_wheat()
+    #get_acc_for_eucalyptus()
