@@ -317,7 +317,7 @@ def generate_haralick_params(df_data, d, count, degrees):
         if 1 in degrees:
             for i in range(0, len(df_data)):
                 df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, d)
-
+    # print(pd.DataFrame(df_data_new))
     return pd.DataFrame(df_data_new)
 
 
@@ -345,14 +345,14 @@ def get_classification_report(data_train, data_test, class_names):
     y_pred = clf.predict(x_test)
     print(classification_report(y_test, y_pred, target_names=class_names))
     disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-    # disp.figure_.suptitle("Confusion Matrix")
+    disp.figure_.suptitle("Confusion Matrix")
     print("Confusion matrix:\n%s" % disp.confusion_matrix)
     plt.close()
 
     return acc
 
 
-def get_statistics(accs):
+def print_statistics(accs):
     print('\nResults')
     print(accs)
     print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
@@ -369,8 +369,9 @@ def get_accuracy(class_names, root_folder, stat_count, input_train_params, input
 
         with open(input_train_params) as train, open(input_test_params) as test:
             data_train = pd.read_csv(train, sep='\t')
+            # print(data_train.T)
             generated_data_train = generate_haralick_params(data_train.T.to_dict(), SKO, iteration_count, averaged_elements)
-            # print(generated_data_train)
+            print(generated_data_train)
 
             data_test = pd.read_csv(test, sep='\t')
 
@@ -381,4 +382,4 @@ def get_accuracy(class_names, root_folder, stat_count, input_train_params, input
 
     # show statistic results
     if stat_count > 1:
-        get_statistics(accs)
+        print_statistics(accs)

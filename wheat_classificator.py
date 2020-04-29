@@ -3,7 +3,7 @@ from classificatorGLCM_NN import convert_images_to_params, get_accuracy
 if __name__ == "__main__":
     class_names = ['1', '2', '3', '6', '8']
     root_folder = './wheat/'
-    stat_count = 10
+    stat_count = 1
 
     SKO = 0.1
     iteration_count = 10
