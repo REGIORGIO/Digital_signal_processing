@@ -433,12 +433,12 @@ def get_optimal(x_train, y_train, x_test, y_test):
 
 def get_acc_for_wheat():
     accs = []
-    for i in range(100):
+    for i in range(50):
         df_train = (generator_data('./train_dir/'))
         df_test = (generator_data('./test_dir/'))
         df_val = pd.DataFrame(generator_data('./val_dir/'))
 
-        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.3, 1000, [10]))
+        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.6, 6000, [10]))
         df_test = pd.DataFrame(generate_haralick_params(df_test, 0.05, 100, [1]))
 
         df_test = pd.concat([df_test, df_val])
@@ -458,11 +458,11 @@ def get_acc_for_wheat():
         print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
 
         clf = MLPClassifier(activation='logistic',
-                            max_iter=1200,
+                            max_iter=500,
                             hidden_layer_sizes=(100,100),
                             solver='lbfgs',
                             early_stopping=True,
-                            max_fun=20000,
+                            max_fun=1000,
                             verbose=0)
 
         clf.fit(x_train, y_train)
