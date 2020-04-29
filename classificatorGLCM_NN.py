@@ -9,13 +9,11 @@ import random
 import cv2 as cv
 from statistics import mean
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
 
 
 def convert_images_to_params(root, file_to_save_name='input_params.csv'):
     image_index = 0
     illness_index = 1
-#[132, 0, 0], # red
     masks = [[132, 0, 0], # red
              [204, 208, 193], # grey
              [245, 228, 103], # light yellow
