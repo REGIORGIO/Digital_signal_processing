@@ -1,11 +1,8 @@
 import pandas as pd
 from skimage.feature import greycomatrix, greycoprops
-import skimage
-import skimage.io
 import os
 import numpy as np
 from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import sklearn.metrics as metrics
 import random
@@ -14,7 +11,8 @@ from statistics import mean
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 
-def generator_data(root):
+
+def convert_images_to_params(root, file_to_save_name='input_params.csv'):
     image_index = 0
     illness_index = 1
 #[132, 0, 0], # red
@@ -39,6 +37,7 @@ def generator_data(root):
         # print("Folder: ", folder_dir)
         for _, filename in enumerate(os.listdir(root + folder_dir)):
             path = root + folder_dir + "/" + filename
+            # print(path)
             if filename[0] == ".":
                 continue
 
@@ -132,7 +131,9 @@ def generator_data(root):
 
             image_index += 1
         illness_index += 1
-    return df_data
+
+    pd.DataFrame(df_data).to_csv(file_to_save_name, sep='\t', index=False)
+    # return df_data
 
 
 def get_nth_sum(df_data, i, n, key, d):
@@ -154,24 +155,20 @@ def get_nth_sum(df_data, i, n, key, d):
     elif n == 5:
         return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key]) / n
     elif n == 6:
-        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] + df_data[i+4][key]) / n
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] +
+                      df_data[i+4][key]) / n
     elif n == 7:
-        return SKO * (
-                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key]
-                    + df_data[i + 3][key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] +
+                      df_data[i+4][key] + df_data[i+5][key]) / n
     elif n == 8:
-        return SKO * (
-                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key] + + df_data[i + 6][key]) / n
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] +
+                      df_data[i+4][key] + df_data[i+5][key] + df_data[i+6][key]) / n
     elif n == 9:
-        return SKO * (
-                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / n
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] +
+                      df_data[i+4][key] + df_data[i+5][key] + df_data[i+6][key] + df_data[i+7][key]) / n
     elif n == 10:
-        return SKO * (
-                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] + df_data[i + 8][
-                    key]) / n
+        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] +
+                      df_data[i+4][key] + df_data[i+5][key] + df_data[i+6][key] + df_data[i+7][key] + df_data[i+8][key]) / n
 
 
 def get_hapalick_params(df_data_new, df_data, i, n, SKO):
@@ -251,15 +248,15 @@ def get_hapalick_params(df_data_new, df_data, i, n, SKO):
 
                         'class': cl
                         })
+
     return df_data_new
 
 
 def generate_haralick_params(df_data, d, count, degrees):
     df_data_new = []
-    # # d = 80
-    # low = 1000 - d
-    # up = 1000 + d
+
     for k in range(count):
+
         if 10 in degrees:
             for i in range(1, len(df_data) - 8):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
@@ -323,55 +320,42 @@ def generate_haralick_params(df_data, d, count, degrees):
             for i in range(0, len(df_data)):
                 df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, d)
 
-    return df_data_new
+    return pd.DataFrame(df_data_new)
 
 
-def get_acc_for_wheat():
-    accs = []
-    for i in range(50):
-        print("Iteration # {}".format(i+1))
-        df_train = (generator_data('./train_dir/'))
-        df_test = (generator_data('./test_dir/'))
-        df_val = pd.DataFrame(generator_data('./val_dir/'))
+def get_classification_report(data_train, data_test, class_names):
+    x_train = data_train.iloc[:, 0:30]
+    y_train = data_train.iloc[:, 30]
 
-        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.55, 5000, [10]))
-        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.05, 100, [1]))
+    x_test = data_test.iloc[:, 0:30]
+    y_test = data_test.iloc[:, 30]
 
-        df_test = pd.concat([df_test, df_val])
-        x_test = df_test.iloc[:, 0:30]
-        y_test = df_test.iloc[:, 30]
+    print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
 
-        # for i in range(12):
-        #     numbers = df_test.iloc[0:10, i]
-        #     plt.hist(numbers, bins=10, cumulative=False)
-        #     plt.grid(linewidth=0.2)
-        #     plt.title(i)
-        #     plt.show()
-        # #
+    clf = MLPClassifier(activation='logistic',
+                        max_iter=1200,
+                        hidden_layer_sizes=(100, 100),
+                        solver='lbfgs',
+                        early_stopping=True,
+                        random_state=1)
 
-        x_train = df_train.iloc[:, 0:30]
-        y_train = df_train.iloc[:, 30]
-        print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
+    clf.fit(x_train, y_train)
+    acc = clf.score(x_test, y_test)
+    print(acc)
 
-        clf = MLPClassifier(activation='logistic',
-                            max_iter=1200,
-                            hidden_layer_sizes=(100, 100),
-                            solver='lbfgs',
-                            early_stopping=True,
-                            verbose=1)
+    # show confusion matrix
+    y_pred = clf.predict(x_test)
+    print(classification_report(y_test, y_pred, target_names=class_names))
+    disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
+    # disp.figure_.suptitle("Confusion Matrix")
+    print("Confusion matrix:\n%s" % disp.confusion_matrix)
+    plt.close()
 
-        clf.fit(x_train, y_train)
-        acc = clf.score(x_test, y_test)
-        accs.append(acc)
-        print(acc)
+    return acc
 
-        target_names = ['1', '2', '3', '6', '8']
-        y_pred = clf.predict(x_test)
-        print(classification_report(y_test, y_pred, target_names=target_names))
-        #disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-        #disp.figure_.suptitle("Confusion Matrix")
-        #print("Confusion matrix:\n%s" % disp.confusion_matrix)
 
+def get_statistics(accs):
+    print('\nResults')
     print(accs)
     print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
     plt.hist(accs, bins=10, cumulative=False)
@@ -379,86 +363,24 @@ def get_acc_for_wheat():
     plt.show()
 
 
-def get_acc_for_eucalyptus():
+def get_accuracy(class_names, root_folder, stat_count, input_train_params, input_test_params, SKO=0.05, iteration_count=100, averaged_elements=[10]):
     accs = []
-    for i in range(10):
-        df = pd.DataFrame(generator_data('./eucalyptus/'))
-        df_train = (generator_data('./eucalyptus_train/'))
-        df_test = (generator_data('./eucalyptus_test/'))
-        # X = df.iloc[:, 0:12]
-        # Y = df.iloc[:, 12]
 
-        # x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1)
-        # get_optimal_params(X, Y)
-        # df_test = (generator_data('./train_dir/'))
-        # # df_val = pd.DataFrame(generator_data('./val_dir/'))
+    for i in range(stat_count):
+        print("Iteration # {}".format(i + 1))
 
-        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.5, 5000, [10]))
-        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.0, 1, [1]))
+        with open(input_train_params) as train, open(input_test_params) as test:
+            data_train = pd.read_csv(train, sep='\t')
+            generated_data_train = generate_haralick_params(data_train.T.to_dict(), SKO, iteration_count, averaged_elements)
+            # print(generated_data_train)
 
-        # df_test = pd.concat([df_test, df_val])
+            data_test = pd.read_csv(test, sep='\t')
 
-        x_test = df_test.iloc[:, 0:30]
-        y_test = df_test.iloc[:, 30]
-        x_train = df_train.iloc[:, 0:30]
-        y_train = df_train.iloc[:, 30]
+            accs.append(get_classification_report(generated_data_train, data_test, class_names))
 
-        # for i in range(12):
-        #     numbers = df_test.iloc[0:10, i]
-        #     plt.hist(numbers, bins=10, cumulative=False)
-        #     plt.grid(linewidth=0.2)
-        #     plt.title(i)
-        #     plt.show()
+            if accs[len(accs) - 1] == max(accs):
+                generated_data_train.to_csv(root_folder + 'best_generated_params.csv', sep='\t', index=False)
 
-        print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
-        # get_optimal(x_train, y_train, x_test, y_test)
-        clf = MLPClassifier(activation='logistic',
-                            max_iter=1000,
-                            hidden_layer_sizes=(100, 100),
-                            solver='lbfgs',
-                            early_stopping=True,
-                            max_fun=20000,
-                            verbose=0)
-
-        clf.fit(x_train, y_train)
-        acc = clf.score(x_test, y_test)
-        accs.append(acc)
-        print(acc)
-
-        target_names = ['1', '2']
-        y_pred = clf.predict(x_test)
-        print(classification_report(y_test, y_pred, target_names=target_names))
-        disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-        disp.figure_.suptitle("Confusion Matrix")
-        print("Confusion matrix:\n%s" % disp.confusion_matrix)
-
-    print(accs)
-    print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
-
-
-if __name__ == "__main__":
-    ''''
-    ill_to_index = {'Бурая ржавчина': 0,
-                    'Желтая ржавчина': 1,
-                    'Корневые гнили': 2,
-                    'Мучнистая роса': 3,
-                    'Пиренофороз': 4,
-                    'Полосатая мозайка': 5,
-                    'Септориоз': 6,
-                    'Снежная плесень': 7
-                    }
-    index_to_ill = {0: 'Бурая ржавчина',
-                    1: 'Желтая ржавчина',
-                    2: 'Корневые гнили',
-                    3: 'Мучнистая роса',
-                    4: 'Пиренофороз',
-                    5: 'Полосатая мозайка',
-                    6: 'Септориоз',
-                    7: 'Снежная плесень'
-                    }
-    '''
-
-
-
-    get_acc_for_wheat()
-    #get_acc_for_eucalyptus()
+    # show statistic results
+    if stat_count > 1:
+        get_statistics(accs)
