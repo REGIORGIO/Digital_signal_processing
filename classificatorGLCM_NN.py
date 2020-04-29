@@ -1,23 +1,17 @@
 import pandas as pd
 from skimage.feature import greycomatrix, greycoprops
-import skimage
-import skimage.io
 import os
 import numpy as np
 from sklearn.neural_network import MLPClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report
 import sklearn.metrics as metrics
 import random
 import cv2 as cv
 from statistics import mean
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
 
-def generator_data(root):
-    image_index = 0
-    illness_index = 1
-#[132, 0, 0], # red
+
+def convert_images_to_texture_characteristics(root, file_name='input_params.csv'):
     masks = [[132, 0, 0], # red
              [204, 208, 193], # grey
              [245, 228, 103], # light yellow
@@ -39,6 +33,7 @@ def generator_data(root):
         # print("Folder: ", folder_dir)
         for _, filename in enumerate(os.listdir(root + folder_dir)):
             path = root + folder_dir + "/" + filename
+            # print(path)
             if filename[0] == ".":
                 continue
 
@@ -56,99 +51,28 @@ def generator_data(root):
             for i in range(len(masks)):
                 glcms[i] = greycomatrix(masked_images[i], offset, angle, levels=levels, symmetric=False, normed=True)
 
-            correlation1 = greycoprops(glcms[0], 'correlation')[0, 0]
-            contrast1 = greycoprops(glcms[0], 'contrast')[0, 0]
-            homogeneity1 = greycoprops(glcms[0], 'homogeneity')[0, 0]
-            energy1 = greycoprops(glcms[0], 'energy')[0, 0]
-            asm1 = greycoprops(glcms[0], 'ASM')[0, 0]
-            dissimilarity1 = greycoprops(glcms[0], 'dissimilarity')[0, 0]
+            temp_dict = {}
+            for k in range(len(glcms)):
+                correlation = greycoprops(glcms[k], 'correlation')[0, 0]
+                contrast = greycoprops(glcms[k], 'contrast')[0, 0]
+                homogeneity = greycoprops(glcms[k], 'homogeneity')[0, 0]
+                energy = greycoprops(glcms[k], 'energy')[0, 0]
+                dissimilarity = greycoprops(glcms[k], 'dissimilarity')[0, 0]
+			
+                temp_dict.update({'correlation{}'.format(k + 1): correlation,
+                                  'contrast{}'.format(k + 1): contrast,
+                                  'homogeneity{}'.format(k + 1): homogeneity,
+                                  'energy{}'.format(k + 1): energy,
+                                  'dissimilarity{}'.format(k + 1): dissimilarity})
 
-            correlation2 = greycoprops(glcms[1], 'correlation')[0, 0]
-            contrast2 = greycoprops(glcms[1], 'contrast')[0, 0]
-            homogeneity2 = greycoprops(glcms[1], 'homogeneity')[0, 0]
-            energy2 = greycoprops(glcms[1], 'energy')[0, 0]
-            asm2 = greycoprops(glcms[1], 'ASM')[0, 0]
-            dissimilarity2 = greycoprops(glcms[1], 'dissimilarity')[0, 0]
+            temp_dict.update({'class': int(folder_dir)})			
+            df_data.append(temp_dict)
 
-            correlation3 = greycoprops(glcms[2], 'correlation')[0, 0]
-            contrast3 = greycoprops(glcms[2], 'contrast')[0, 0]
-            homogeneity3 = greycoprops(glcms[2], 'homogeneity')[0, 0]
-            energy3 = greycoprops(glcms[2], 'energy')[0, 0]
-            asm3 = greycoprops(glcms[2], 'ASM')[0, 0]
-            dissimilarity3 = greycoprops(glcms[2], 'dissimilarity')[0, 0]
-
-            correlation4 = greycoprops(glcms[3], 'correlation')[0, 0]
-            contrast4 = greycoprops(glcms[3], 'contrast')[0, 0]
-            homogeneity4 = greycoprops(glcms[3], 'homogeneity')[0, 0]
-            energy4 = greycoprops(glcms[3], 'energy')[0, 0]
-            asm4 = greycoprops(glcms[3], 'ASM')[0, 0]
-            dissimilarity4 = greycoprops(glcms[3], 'dissimilarity')[0, 0]
-
-            correlation5 = greycoprops(glcms[4], 'correlation')[0, 0]
-            contrast5 = greycoprops(glcms[4], 'contrast')[0, 0]
-            homogeneity5 = greycoprops(glcms[4], 'homogeneity')[0, 0]
-            energy5 = greycoprops(glcms[4], 'energy')[0, 0]
-            asm5 = greycoprops(glcms[4], 'ASM')[0, 0]
-            dissimilarity5 = greycoprops(glcms[4], 'dissimilarity')[0, 0]
-
-            correlation6 = greycoprops(glcms[5], 'correlation')[0, 0]
-            contrast6 = greycoprops(glcms[5], 'contrast')[0, 0]
-            homogeneity6 = greycoprops(glcms[5], 'homogeneity')[0, 0]
-            energy6 = greycoprops(glcms[5], 'energy')[0, 0]
-            asm6 = greycoprops(glcms[5], 'ASM')[0, 0]
-            dissimilarity6 = greycoprops(glcms[5], 'dissimilarity')[0, 0]
-
-            df_data.append({'correlation1': correlation1,
-                            'contrast1': contrast1,
-                            'homogeneity1': homogeneity1,
-                            'energy1': energy1,
-                            'asm1': asm1,
-                            'dissimilarity1': dissimilarity1,
-
-                            'correlation2': correlation2,
-                            'contrast2': contrast2,
-                            'homogeneity2': homogeneity2,
-                            'energy2': energy2,
-                            'asm2': asm2,
-                            'dissimilarity2': dissimilarity2,
-
-                            'correlation3': correlation3,
-                            'contrast3': contrast3,
-                            'homogeneity3': homogeneity3,
-                            'energy3': energy3,
-                            'asm3': asm3,
-                            'dissimilarity3': dissimilarity3,
-
-                            'correlation4': correlation4,
-                            'contrast4': contrast4,
-                            'homogeneity4': homogeneity4,
-                            'energy4': energy4,
-                            'asm4': asm4,
-                            'dissimilarity4': dissimilarity4,
-
-                            'correlation5': correlation5,
-                            'contrast5': contrast5,
-                            'homogeneity5': homogeneity5,
-                            'energy5': energy5,
-                            'asm5': asm5,
-                            'dissimilarity5': dissimilarity5,
-
-                            'correlation6': correlation6,
-                            'contrast6': contrast6,
-                            'homogeneity6': homogeneity6,
-                            'energy6': energy6,
-                            'asm6': asm6,
-                            'dissimilarity6': dissimilarity6,
-
-                            'class': int(folder_dir)})
-
-            image_index += 1
-        illness_index += 1
-    return df_data
+    pd.DataFrame(df_data).to_csv(file_name, sep='\t', index=False)
+    # return df_data
 
 
-def get_nth_sum(df_data, i, n, key, d):
-
+def averaging_over_n_images(df_data, i, n, key, d):
     if d != 0:
         low = 1 - d
         up = 1 + d
@@ -158,182 +82,109 @@ def get_nth_sum(df_data, i, n, key, d):
     if n == 1:
         return SKO * df_data[i][key]
     if n == 2:
-        return SKO * (df_data[i-1][key] + df_data[i][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key]) / n
     elif n == 3:
-        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key]) / n
     elif n == 4:
-        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key]) / n
     elif n == 5:
-        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key]) / n
     elif n == 6:
-        return SKO * (df_data[i-1][key] + df_data[i][key] + df_data[i+1][key] + df_data[i+2][key] + df_data[i+3][key] + df_data[i+4][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
+                      df_data[i + 4][key]) / n
     elif n == 7:
-        return SKO * (
-                    df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key]
-                    + df_data[i + 3][key] + df_data[i + 4][key] + df_data[i + 5][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
+                      df_data[i + 4][key] + df_data[i + 5][key]) / n
     elif n == 8:
-        return SKO * (
-                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key] + + df_data[i + 6][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
+                      df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key]) / n
     elif n == 9:
-        return SKO * (
-                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / n
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
+                      df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / n
     elif n == 10:
-        return SKO * (
-                df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3]
-        [key] + df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] + df_data[i + 8][
-                    key]) / n
-
-
-def get_hapalick_params(df_data_new, df_data, i, n, SKO):
-
-    correlation1 = get_nth_sum(df_data, i, n, 'correlation1', SKO)
-    contrast1 = get_nth_sum(df_data, i, n, 'contrast1', SKO)
-    homogeneity1 = get_nth_sum(df_data, i, n, 'homogeneity1', SKO)
-    energy1 = get_nth_sum(df_data, i, n, 'energy1', SKO)
-    asm1 = get_nth_sum(df_data, i, n, 'asm1', SKO)
-    dissimilarity1 = get_nth_sum(df_data, i, n, 'dissimilarity1', SKO)
-
-    correlation2 = get_nth_sum(df_data, i, n, 'correlation2', SKO)
-    contrast2 = get_nth_sum(df_data, i, n, 'contrast2', SKO)
-    homogeneity2 = get_nth_sum(df_data, i, n, 'homogeneity2', SKO)
-    energy2 = get_nth_sum(df_data, i, n, 'energy2', SKO)
-    asm2 = get_nth_sum(df_data, i, n, 'asm2', SKO)
-    dissimilarity2 = get_nth_sum(df_data, i, n, 'dissimilarity2', SKO)
-
-    correlation3 = get_nth_sum(df_data, i, n, 'correlation3', SKO)
-    contrast3 = get_nth_sum(df_data, i, n, 'contrast3', SKO)
-    homogeneity3 = get_nth_sum(df_data, i, n, 'homogeneity3', SKO)
-    energy3 = get_nth_sum(df_data, i, n, 'energy3', SKO)
-    asm3 = get_nth_sum(df_data, i, n, 'asm3', SKO)
-    dissimilarity3 = get_nth_sum(df_data, i, n, 'dissimilarity3', SKO)
-
-    correlation4 = get_nth_sum(df_data, i, n, 'correlation4', SKO)
-    contrast4 = get_nth_sum(df_data, i, n, 'contrast4', SKO)
-    homogeneity4 = get_nth_sum(df_data, i, n, 'homogeneity4', SKO)
-    energy4 = get_nth_sum(df_data, i, n, 'energy4', SKO)
-    asm4 = get_nth_sum(df_data, i, n, 'asm4', SKO)
-    dissimilarity4 = get_nth_sum(df_data, i, n, 'dissimilarity4', SKO)
-
-    correlation5 = get_nth_sum(df_data, i, n, 'correlation5', SKO)
-    contrast5 = get_nth_sum(df_data, i, n, 'contrast5', SKO)
-    homogeneity5 = get_nth_sum(df_data, i, n, 'homogeneity5', SKO)
-    energy5 = get_nth_sum(df_data, i, n, 'energy5', SKO)
-    asm5 = get_nth_sum(df_data, i, n, 'asm5', SKO)
-    dissimilarity5 = get_nth_sum(df_data, i, n, 'dissimilarity5', SKO)
-
-    correlation6 = get_nth_sum(df_data, i, n, 'correlation6', SKO)
-    contrast6 = get_nth_sum(df_data, i, n, 'contrast6', SKO)
-    homogeneity6 = get_nth_sum(df_data, i, n, 'homogeneity6', SKO)
-    energy6 = get_nth_sum(df_data, i, n, 'energy6', SKO)
-    asm6 = get_nth_sum(df_data, i, n, 'asm6', SKO)
-    dissimilarity6 = get_nth_sum(df_data, i, n, 'dissimilarity6', SKO)
-
-    cl = df_data[i]['class']
-    df_data_new.append({'correlation1': correlation1,
-                        'contrast1': contrast1,
-                        'homogeneity1': homogeneity1,
-                        'energy1': energy1,
-                        'asm1': asm1,
-                        'dissimilarity1': dissimilarity1,
-
-                        'correlation2': correlation2,
-                        'contrast2': contrast2,
-                        'homogeneity2': homogeneity2,
-                        'energy2': energy2,
-                        'asm2': asm2,
-                        'dissimilarity2': dissimilarity2,
-
-                        'correlation3': correlation3,
-                        'contrast3': contrast3,
-                        'homogeneity3': homogeneity3,
-                        'energy3': energy3,
-                        'asm3': asm3,
-                        'dissimilarity3': dissimilarity3,
-
-                        'correlation4': correlation4,
-                        'contrast4': contrast4,
-                        'homogeneity4': homogeneity4,
-                        'energy4': energy4,
-                        'asm4': asm4,
-                        'dissimilarity4': dissimilarity4,
-
-                        'correlation5': correlation5,
-                        'contrast5': contrast5,
-                        'homogeneity5': homogeneity5,
-                        'energy5': energy5,
-                        'asm5': asm5,
-                        'dissimilarity5': dissimilarity5,
-
-                        'correlation6': correlation6,
-                        'contrast6': contrast6,
-                        'homogeneity6': homogeneity6,
-                        'energy6': energy6,
-                        'asm6': asm6,
-                        'dissimilarity6': dissimilarity6,
-
-                        'class': cl
-                        })
-    return df_data_new
+        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
+                      df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] + df_data[i + 8][key]) / n
 
 
 def generate_haralick_params(df_data, d, count, degrees):
+    def get_hapalick_params(df_data_new, df_data, i, n, SKO):
+        cl = df_data[i]['class']
+        temp_dict = {}
+        for k in range(6):
+            correlation = averaging_over_n_images(df_data, i, n, 'correlation{}'.format(k + 1), SKO)
+            contrast = averaging_over_n_images(df_data, i, n, 'contrast{}'.format(k + 1), SKO)
+            homogeneity = averaging_over_n_images(df_data, i, n, 'homogeneity{}'.format(k + 1), SKO)
+            energy = averaging_over_n_images(df_data, i, n, 'energy{}'.format(k + 1), SKO)
+            dissimilarity = averaging_over_n_images(df_data, i, n, 'dissimilarity{}'.format(k + 1), SKO)
+
+            temp_dict.update({'correlation{}'.format(k + 1): correlation,
+                              'contrast{}'.format(k + 1): contrast,
+                              'homogeneity{}'.format(k + 1): homogeneity,
+                              'energy{}'.format(k + 1): energy,
+                              'dissimilarity{}'.format(k + 1): dissimilarity})
+        temp_dict.update({'class':cl})
+
+        df_data_new.append(temp_dict)
+        return df_data_new
+    
     df_data_new = []
-    # # d = 80
-    # low = 1000 - d
-    # up = 1000 + d
+
     for k in range(count):
+
         if 10 in degrees:
             for i in range(1, len(df_data) - 8):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
-                        df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] ==\
-                        df_data[i + 7]['class'] == df_data[i + 8]['class']:
+                   df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] == \
+                   df_data[i + 7]['class'] == df_data[i + 8]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 10, d)
                 else:
                     continue
         if 9 in degrees:
             for i in range(1, len(df_data) - 7):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
-                        df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] == df_data[i + 7]['class']:
+                   df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] == \
+                   df_data[i + 7]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 9, d)
                 else:
                     continue
         if 8 in degrees:
             for i in range(1, len(df_data) - 6):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
-                        df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class']:
+                   df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 8, d)
                 else:
                     continue
         if 7 in degrees:
             for i in range(1, len(df_data) - 5):
-                if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class'] == df_data[i+5]['class']:
+                if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
+                   df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 7, d)
                 else:
                     continue
         if 6 in degrees:
             for i in range(1, len(df_data) - 4):
-                if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class'] == df_data[i+4]['class']:
+                if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
+                   df_data[i + 3]['class'] == df_data[i+4]['class']:
                     # SKO = random.randint(low, up) / 1000
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 6, d)
                 else:
                     continue
         if 5 in degrees:
             for i in range(1, len(df_data) - 3):
-                if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class'] == df_data[i+3]['class']:
+                if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
+                   df_data[i + 3]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, d)
                 else:
                     continue
         if 4 in degrees:
             for i in range(1, len(df_data) - 2):
-                if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class'] == df_data[i+2]['class']:
+                if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, d)
                 else:
                     continue
         if 3 in degrees:
             for i in range(1, len(df_data)-1):
-                if df_data[i]['class'] == df_data[i-1]['class'] == df_data[i+1]['class']:
+                if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class']:
                     df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, d)
                 else:
                     continue
@@ -347,136 +198,42 @@ def generate_haralick_params(df_data, d, count, degrees):
             for i in range(0, len(df_data)):
                 df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, d)
 
-    return df_data_new
+    return pd.DataFrame(df_data_new)
 
 
-def get_optimal_params(x_train, y_train):
-    parameter_space = {
-        'alpha': [0.0001, 0.001, 0.01],
-        'hidden_layer_sizes': [(30, 30), (40, 40), (50, 50), (100, 100), (100,)],
-        'activation': ['logistic'],
-        'solver': ['adam', 'lbfgs', 'sgd'],
-        'max_iter': [600, 700, 800, 900, 1000, 1100, 1200]
-    }
-    mlp = MLPClassifier(verbose=0)
+def get_classification_report(data_train, data_test, class_names):
+    x_train = data_train.iloc[:, 0:30]
+    y_train = data_train.iloc[:, 30]
 
-    clf = GridSearchCV(mlp, parameter_space, n_jobs=-1, cv=5)
+    x_test = data_test.iloc[:, 0:30]
+    y_test = data_test.iloc[:, 30]
+
+    print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
+
+    clf = MLPClassifier(activation='logistic',
+                        max_iter=1200,
+                        hidden_layer_sizes=(100, 100),
+                        solver='lbfgs',
+                        early_stopping=True,
+                        random_state=1)
+
     clf.fit(x_train, y_train)
-    print('Best parameters found:\n', clf.best_params_)
+    acc = clf.score(x_test, y_test)
+    print(acc)
 
-    means = clf.cv_results_['mean_test_score']
-    print(max(means))
-    # stds = clf.cv_results_['std_test_score']
-    # for mean, std, params in zip(means, stds, clf.cv_results_['params']):
-    #     print("%0.3f (+/-%0.03f) for %r" % (mean, std * 2, params))
-    # accuracy = clf.score(x_test, y_test)
-    # print("Accuracy = {}\n".format(accuracy))
-    # target_names = ['1', '2', '3', '4', '5', '6', '7', '8']
-    # y_pred = clf.predict(x_test)
-    # print(classification_report(y_test, y_pred, target_names=target_names))
-    # disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
+    # show confusion matrix
+    y_pred = clf.predict(x_test)
+    print(classification_report(y_test, y_pred, target_names=class_names))
+    disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
     # disp.figure_.suptitle("Confusion Matrix")
-    # print("Confusion matrix:\n%s" % disp.confusion_matrix)
+    print("Confusion matrix:\n%s" % disp.confusion_matrix)
+    plt.close()
 
-    # return clf.best_params_
-
-
-def get_optimal(x_train, y_train, x_test, y_test):
-    parameter_space = {
-        'alphas': [0.0001, 0.001, 0.01],
-        'hidden_layer_sizes': [(30, 30), (40, 40), (50, 50), (100, 100), (100,)],
-        'activations': ['relu', 'logistic'],
-        'solvers': ['adam', 'lbfgs'],
-        'max_iters': [600, 700, 800, 900, 1000, 1200]
-    }
-    best_accuracy = 0
-    best_params = {'activation': 0,
-                   'alpha': 0,
-                   'hidden_layer_sizes': (1,),
-                   'solver': '',
-                   'max_iter': 0
-                   }
-
-    for alpha in parameter_space['alphas']:
-        for hidden_layer_size in parameter_space['hidden_layer_sizes']:
-            for activation in parameter_space['activations']:
-                for solver in parameter_space['solvers']:
-                    for max_iter in parameter_space['max_iters']:
-                        clf = MLPClassifier(alpha=alpha,
-                                            hidden_layer_sizes=hidden_layer_size,
-                                            activation=activation,
-                                            solver=solver,
-                                            max_iter=max_iter
-                                            )
-                        clf.fit(x_train, y_train)
-
-                        accuracy = clf.score(x_test, y_test)
-                        if accuracy > best_accuracy:
-                            best_accuracy = accuracy
-                            best_params['activation'] = activation
-                            best_params['alpha'] = alpha
-                            best_params['hidden_layer_sizes'] = hidden_layer_size
-                            best_params['solver'] = solver
-                            best_params['max_iter'] = max_iter
+    return acc
 
 
-                        print('{} <-- Activation = {} '
-                              'Alpha = {} Hidden_layer_sizes = {}'
-                              ' Solver = {} Epoch = {}'.format(accuracy, activation, alpha, hidden_layer_size, solver, max_iter))
-    print('\nBest params:')
-    print('{} <-- Activation = {} '
-          'Alpha = {} Hidden_layer_sizes = {}'
-          ' Solver = {} Epoch = {}'.format(best_accuracy, best_params['activation'],
-                                           best_params['alpha'], best_params['hidden_layer_sizes'],
-                                           best_params['solver'], best_params['max_iter']))
-
-
-def get_acc_for_wheat():
-    accs = []
-    for i in range(50):
-        df_train = (generator_data('./train_dir/'))
-        df_test = (generator_data('./test_dir/'))
-        df_val = pd.DataFrame(generator_data('./val_dir/'))
-
-        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.6, 6000, [10]))
-        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.05, 100, [1]))
-
-        df_test = pd.concat([df_test, df_val])
-        x_test = df_test.iloc[:, 0:36]
-        y_test = df_test.iloc[:, 36]
-
-        # for i in range(12):
-        #     numbers = df_test.iloc[0:10, i]
-        #     plt.hist(numbers, bins=10, cumulative=False)
-        #     plt.grid(linewidth=0.2)
-        #     plt.title(i)
-        #     plt.show()
-        # #
-
-        x_train = df_train.iloc[:, 0:36]
-        y_train = df_train.iloc[:, 36]
-        print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
-
-        clf = MLPClassifier(activation='logistic',
-                            max_iter=500,
-                            hidden_layer_sizes=(100,100),
-                            solver='lbfgs',
-                            early_stopping=True,
-                            max_fun=1000,
-                            verbose=0)
-
-        clf.fit(x_train, y_train)
-        acc = clf.score(x_test, y_test)
-        accs.append(acc)
-        print(acc)
-
-        target_names = ['1', '2', '3', '6', '8']
-        y_pred = clf.predict(x_test)
-        print(classification_report(y_test, y_pred, target_names=target_names))
-        #disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-        #disp.figure_.suptitle("Confusion Matrix")
-        #print("Confusion matrix:\n%s" % disp.confusion_matrix)
-
+def get_statistics(accs):
+    print('\nResults')
     print(accs)
     print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
     plt.hist(accs, bins=10, cumulative=False)
@@ -484,86 +241,25 @@ def get_acc_for_wheat():
     plt.show()
 
 
-def get_acc_for_eucalyptus():
+def get_accuracy(class_names, root_folder, stat_count, input_train_params, input_test_params, SKO=0.05, iteration_count=100, averaged_elements=[10]):
     accs = []
-    for i in range(10):
-        df = pd.DataFrame(generator_data('./eucalyptus/'))
-        df_train = (generator_data('./eucalyptus_train/'))
-        df_test = (generator_data('./eucalyptus_test/'))
-        # X = df.iloc[:, 0:12]
-        # Y = df.iloc[:, 12]
 
-        # x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=1)
-        # get_optimal_params(X, Y)
-        # df_test = (generator_data('./train_dir/'))
-        # # df_val = pd.DataFrame(generator_data('./val_dir/'))
+    for i in range(stat_count):
+        print("Iteration # {}".format(i + 1))
 
-        df_train = pd.DataFrame(generate_haralick_params(df_train, 0.3, 50, [1,2,3]))
-        df_test = pd.DataFrame(generate_haralick_params(df_test, 0.0, 1, [1]))
+        with open(input_train_params) as train, open(input_test_params) as test:
+            data_train = pd.read_csv(train, sep='\t')
+            #print(data_train)
+            generated_data_train = generate_haralick_params(data_train.T.to_dict(), SKO, iteration_count, averaged_elements)
+            #print(generated_data_train)
 
-        # df_test = pd.concat([df_test, df_val])
+            data_test = pd.read_csv(test, sep='\t')
 
-        x_test = df_test.iloc[:, 0:30]
-        y_test = df_test.iloc[:, 30]
-        x_train = df_train.iloc[:, 0:30]
-        y_train = df_train.iloc[:, 30]
+            accs.append(get_classification_report(generated_data_train, data_test, class_names))
 
-        # for i in range(12):
-        #     numbers = df_test.iloc[0:10, i]
-        #     plt.hist(numbers, bins=10, cumulative=False)
-        #     plt.grid(linewidth=0.2)
-        #     plt.title(i)
-        #     plt.show()
+            if accs[len(accs) - 1] == max(accs):
+                generated_data_train.to_csv(root_folder + 'best_generated_params.csv', sep='\t', index=False)
 
-        print('Train size = {}, test size = {}'.format(len(y_train), len(y_test)))
-        # get_optimal(x_train, y_train, x_test, y_test)
-        clf = MLPClassifier(activation='logistic',
-                            max_iter=1000,
-                            hidden_layer_sizes=(50, 50, 50),
-                            solver='adam',
-                            early_stopping=True,
-                            max_fun=20000,
-                            verbose=0)
-
-        clf.fit(x_train, y_train)
-        acc = clf.score(x_test, y_test)
-        accs.append(acc)
-        print(acc)
-
-        target_names = ['1', '2']
-        y_pred = clf.predict(x_test)
-        print(classification_report(y_test, y_pred, target_names=target_names))
-        disp = metrics.plot_confusion_matrix(clf, x_test, y_test)
-        disp.figure_.suptitle("Confusion Matrix")
-        print("Confusion matrix:\n%s" % disp.confusion_matrix)
-
-    print(accs)
-    print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
-
-
-if __name__ == "__main__":
-    ''''
-    ill_to_index = {'Бурая ржавчина': 0,
-                    'Желтая ржавчина': 1,
-                    'Корневые гнили': 2,
-                    'Мучнистая роса': 3,
-                    'Пиренофороз': 4,
-                    'Полосатая мозайка': 5,
-                    'Септориоз': 6,
-                    'Снежная плесень': 7
-                    }
-    index_to_ill = {0: 'Бурая ржавчина',
-                    1: 'Желтая ржавчина',
-                    2: 'Корневые гнили',
-                    3: 'Мучнистая роса',
-                    4: 'Пиренофороз',
-                    5: 'Полосатая мозайка',
-                    6: 'Септориоз',
-                    7: 'Снежная плесень'
-                    }
-    '''
-
-
-
-    get_acc_for_wheat()
-    #get_acc_for_eucalyptus()
+    # show statistic results
+    if stat_count > 1:
+        get_statistics(accs)
