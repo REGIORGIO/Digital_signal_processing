@@ -11,7 +11,13 @@ from statistics import mean
 from matplotlib import pyplot as plt
 
 
-def convert_images_to_texture_characteristics(root, file_name='input_params.csv'):
+def convert_images_to_textural_characteristics(root, file_name='input_params.csv'):
+    """ Function reads images and convert them to Haralick's Dataframe using GLCM matrix.
+
+    :param root:        Path to dir with disease folders.
+    :param file_name:   Name of the file to save data in.
+    :return:            Frame of textural characteristics of images.
+    """
     masks = [[132, 0, 0], # red
              [204, 208, 193], # grey
              [245, 228, 103], # light yellow
@@ -72,136 +78,178 @@ def convert_images_to_texture_characteristics(root, file_name='input_params.csv'
     # return df_data
 
 
-def averaging_over_n_images(df_data, i, n, key, d):
-    if d != 0:
-        low = 1 - d
-        up = 1 + d
-        SKO = random.choice(np.arange(low, up, 0.0001))
-    else:
-        SKO = 1
-    if n == 1:
-        return SKO * df_data[i][key]
-    if n == 2:
-        return SKO * (df_data[i - 1][key] + df_data[i][key]) / n
-    elif n == 3:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key]) / n
-    elif n == 4:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key]) / n
-    elif n == 5:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key]) / n
-    elif n == 6:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
-                      df_data[i + 4][key]) / n
-    elif n == 7:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
-                      df_data[i + 4][key] + df_data[i + 5][key]) / n
-    elif n == 8:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
-                      df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key]) / n
-    elif n == 9:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
-                      df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / n
-    elif n == 10:
-        return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] + df_data[i + 3][key] +
-                      df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] + df_data[i + 8][key]) / n
+def generate_haralick_params(df_data, SKO, iteration_count, averaged_elements):
+    """Function creates new dataframe of Haralick's params.
+    
+    :param df_data:                  Frame of Haralick's params.
+    :param SKO:                      The noise value.
+    :param iteration_count:          Count of iterations of generating parameter sets from the averaged group.
+    :param averaged_elements:        Count of averaging params.
+    :return:                         New dataframe of Haralick's params.
+    """
+    def get_hapalick_params(df_data_new, df_data, i, averaged_elements, SKO):
+        """Helper function for generating Haralick's params.
 
-
-def generate_haralick_params(df_data, d, count, degrees):
-    def get_hapalick_params(df_data_new, df_data, i, n, SKO):
+        :param df_data_new:             Datarame for gererated Haralick's params.
+        :param df_data:                 Initial frame of Haralick's params.
+        :param i:                       Number of the current image.
+        :param averaged_elements:       Count of averaging params.
+        :param SKO:                     The noise value.
+        :return:
+        """
         cl = df_data[i]['class']
         temp_dict = {}
         for k in range(6):
-            correlation = averaging_over_n_images(df_data, i, n, 'correlation{}'.format(k + 1), SKO)
-            contrast = averaging_over_n_images(df_data, i, n, 'contrast{}'.format(k + 1), SKO)
-            homogeneity = averaging_over_n_images(df_data, i, n, 'homogeneity{}'.format(k + 1), SKO)
-            energy = averaging_over_n_images(df_data, i, n, 'energy{}'.format(k + 1), SKO)
-            dissimilarity = averaging_over_n_images(df_data, i, n, 'dissimilarity{}'.format(k + 1), SKO)
+            correlation = averaging_over_n_images(df_data, i, averaged_elements, 'correlation{}'.format(k + 1), SKO)
+            contrast = averaging_over_n_images(df_data, i, averaged_elements, 'contrast{}'.format(k + 1), SKO)
+            homogeneity = averaging_over_n_images(df_data, i, averaged_elements, 'homogeneity{}'.format(k + 1), SKO)
+            energy = averaging_over_n_images(df_data, i, averaged_elements, 'energy{}'.format(k + 1), SKO)
+            dissimilarity = averaging_over_n_images(df_data, i, averaged_elements, 'dissimilarity{}'.format(k + 1), SKO)
 
             temp_dict.update({'correlation{}'.format(k + 1): correlation,
                               'contrast{}'.format(k + 1): contrast,
                               'homogeneity{}'.format(k + 1): homogeneity,
                               'energy{}'.format(k + 1): energy,
                               'dissimilarity{}'.format(k + 1): dissimilarity})
-        temp_dict.update({'class':cl})
+        temp_dict.update({'class': cl})
 
         df_data_new.append(temp_dict)
         return df_data_new
-    
+
+    def averaging_over_n_images(df_data, i, averaged_elements, key, SKO):
+        """Helper function for generating Haralick's params.
+        Function averages n images to find the mathematical expectation of textural params and add some noize to it.
+
+        :param df_data:                 Frame of Haralick's params.
+        :param i:                       Number of the current image.
+        :param averaged_elements:       Count of averaging params.
+        :param key:                     Name of Haralick's param.
+        :param SKO:                     The noise value.
+        :return:                        New parameter value.
+        """
+        if SKO != 0:
+            low = 1 - SKO
+            up = 1 + SKO
+            SKO = random.choice(np.arange(low, up, 0.0001))
+        else:
+            SKO = 1
+        if averaged_elements == 1:
+            return SKO * df_data[i][key]
+        if averaged_elements == 2:
+            return SKO * (df_data[i - 1][key] + df_data[i][key]) / averaged_elements
+        elif averaged_elements == 3:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key]) / averaged_elements
+        elif averaged_elements == 4:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][
+                key]) / averaged_elements
+        elif averaged_elements == 5:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
+                          df_data[i + 3][key]) / averaged_elements
+        elif averaged_elements == 6:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
+                          df_data[i + 3][key] +
+                          df_data[i + 4][key]) / averaged_elements
+        elif averaged_elements == 7:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
+                          df_data[i + 3][key] +
+                          df_data[i + 4][key] + df_data[i + 5][key]) / averaged_elements
+        elif averaged_elements == 8:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
+                          df_data[i + 3][key] +
+                          df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key]) / averaged_elements
+        elif averaged_elements == 9:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
+                          df_data[i + 3][key] +
+                          df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][
+                              key]) / averaged_elements
+        elif averaged_elements == 10:
+            return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
+                          df_data[i + 3][key] +
+                          df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key] +
+                          df_data[i + 8][key]) / averaged_elements
+
     df_data_new = []
 
-    for k in range(count):
+    for k in range(iteration_count):
 
-        if 10 in degrees:
+        if 10 in averaged_elements:
             for i in range(1, len(df_data) - 8):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
                    df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] == \
                    df_data[i + 7]['class'] == df_data[i + 8]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 10, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 10, SKO)
                 else:
                     continue
-        if 9 in degrees:
+        if 9 in averaged_elements:
             for i in range(1, len(df_data) - 7):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
                    df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class'] == \
                    df_data[i + 7]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 9, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 9, SKO)
                 else:
                     continue
-        if 8 in degrees:
+        if 8 in averaged_elements:
             for i in range(1, len(df_data) - 6):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
                    df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class'] == df_data[i + 6]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 8, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 8, SKO)
                 else:
                     continue
-        if 7 in degrees:
+        if 7 in averaged_elements:
             for i in range(1, len(df_data) - 5):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
                    df_data[i + 3]['class'] == df_data[i + 4]['class'] == df_data[i + 5]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 7, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 7, SKO)
                 else:
                     continue
-        if 6 in degrees:
+        if 6 in averaged_elements:
             for i in range(1, len(df_data) - 4):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
                    df_data[i + 3]['class'] == df_data[i+4]['class']:
                     # SKO = random.randint(low, up) / 1000
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 6, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 6, SKO)
                 else:
                     continue
-        if 5 in degrees:
+        if 5 in averaged_elements:
             for i in range(1, len(df_data) - 3):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class'] == \
                    df_data[i + 3]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 5, SKO)
                 else:
                     continue
-        if 4 in degrees:
+        if 4 in averaged_elements:
             for i in range(1, len(df_data) - 2):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class'] == df_data[i + 2]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 4, SKO)
                 else:
                     continue
-        if 3 in degrees:
+        if 3 in averaged_elements:
             for i in range(1, len(df_data)-1):
                 if df_data[i]['class'] == df_data[i - 1]['class'] == df_data[i + 1]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 3, SKO)
                 else:
                     continue
-        if 2 in degrees:
+        if 2 in averaged_elements:
             for i in range(1, len(df_data)):
                 if df_data[i]['class'] == df_data[i - 1]['class']:
-                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, d)
+                    df_data_new = get_hapalick_params(df_data_new, df_data, i, 2, SKO)
                 else:
                     continue
-        if 1 in degrees:
+        if 1 in averaged_elements:
             for i in range(0, len(df_data)):
-                df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, d)
+                df_data_new = get_hapalick_params(df_data_new, df_data, i, 1, SKO)
 
     return pd.DataFrame(df_data_new)
 
 
 def get_classification_report(data_train, data_test, class_names):
+    """Function calculates the accuracy of disease recognition by the neural network.
+
+    :param data_train:  Frame of train data.
+    :param data_test:   Frame of test data.
+    :param class_names: List of disease names.
+    :return:            Accuracy of classification.
+    """
     x_train = data_train.iloc[:, 0:30]
     y_train = data_train.iloc[:, 30]
 
@@ -233,6 +281,11 @@ def get_classification_report(data_train, data_test, class_names):
 
 
 def get_statistics(accs):
+    """Function prints information about max, miv and average accuracy.
+
+    :param accs:        List of accuracies.
+    :return:            None.
+    """
     print('\nResults')
     print(accs)
     print("MAX Accuracy = {}\nMIN Accuracy = {}\nAVG Accuracy = {}\n  ".format(max(accs), min(accs), mean(accs)))
@@ -242,6 +295,18 @@ def get_statistics(accs):
 
 
 def get_accuracy(class_names, root_folder, stat_count, input_train_params, input_test_params, SKO=0.05, iteration_count=100, averaged_elements=[10]):
+    """Function calls the classification process and outputs the best texture parameters to .csv file.
+
+    :param class_names:         List of disease names.
+    :param root_folder:         Path to dir with disease folders.
+    :param stat_count:          Number of times the classification accuracy is calculated.
+    :param input_train_params:  Name of .csv file with textural params for training.
+    :param input_test_params:   Name of .csv file with textural params for testing.
+    :param SKO:                 The noise value.
+    :param iteration_count:     Count of iterations of generating parameter sets from the averaged group.
+    :param averaged_elements:   Count of averaging params.
+    :return:                    None.
+    """
     accs = []
 
     for i in range(stat_count):
