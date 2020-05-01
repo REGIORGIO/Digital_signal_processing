@@ -160,8 +160,7 @@ def generate_haralick_params(df_data, SKO, iteration_count, averaged_elements):
         elif averaged_elements == 9:
             return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
                           df_data[i + 3][key] +
-                          df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][
-                              key]) / averaged_elements
+                          df_data[i + 4][key] + df_data[i + 5][key] + df_data[i + 6][key] + df_data[i + 7][key]) / averaged_elements
         elif averaged_elements == 10:
             return SKO * (df_data[i - 1][key] + df_data[i][key] + df_data[i + 1][key] + df_data[i + 2][key] +
                           df_data[i + 3][key] +
@@ -260,10 +259,9 @@ def get_classification_report(data_train, data_test, class_names):
 
     clf = MLPClassifier(activation='logistic',
                         max_iter=1200,
-                        hidden_layer_sizes=(100, 100),
+                        hidden_layer_sizes=(100,),
                         solver='lbfgs',
-                        early_stopping=True,
-                        random_state=1)
+                        early_stopping=True)
 
     clf.fit(x_train, y_train)
     acc = clf.score(x_test, y_test)
@@ -294,7 +292,7 @@ def get_statistics(accs):
     plt.show()
 
 
-def get_accuracy(class_names, root_folder, stat_count, input_train_params, input_test_params, SKO=0.05, iteration_count=100, averaged_elements=[10]):
+def get_accuracy(class_names, root_folder, stat_count, input_train_params, input_test_params, SKO=0.05, iteration_count=100, averaged_elements=[10], is_generate=True):
     """Function calls the classification process and outputs the best texture parameters to .csv file.
 
     :param class_names:         List of disease names.
@@ -314,16 +312,16 @@ def get_accuracy(class_names, root_folder, stat_count, input_train_params, input
 
         with open(input_train_params) as train, open(input_test_params) as test:
             data_train = pd.read_csv(train, sep='\t')
-            #print(data_train)
-            generated_data_train = generate_haralick_params(data_train.T.to_dict(), SKO, iteration_count, averaged_elements)
-            #print(generated_data_train)
+            if is_generate:
+                data_train = generate_haralick_params(data_train.T.to_dict(), SKO, iteration_count, averaged_elements)
 
             data_test = pd.read_csv(test, sep='\t')
+        # uncomment to get extra  test images
+        # data_test = generate_haralick_params(data_test.T.to_dict(), 0.05, 50, [1])
+        accs.append(get_classification_report(data_train, data_test, class_names))
 
-            accs.append(get_classification_report(generated_data_train, data_test, class_names))
-
-            if accs[len(accs) - 1] == max(accs):
-                generated_data_train.to_csv(root_folder + 'best_generated_params.csv', sep='\t', index=False)
+        if accs[len(accs) - 1] == max(accs):
+            data_train.to_csv(root_folder + 'best_generated_params.csv', sep='\t', index=False)
 
     # show statistic results
     if stat_count > 1:
